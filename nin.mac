@@ -1,0 +1,19 @@
+#include Ninjadvloota2.inc
+
+Sub Main
+
+/call SetupAdvLootVars
+
+|/call DoLootStuff sell
+
+
+
+:sell
+
+/doevents
+/delay 1
+/goto :sell
+
+
+
+/return 

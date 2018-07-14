@@ -1,0 +1,88 @@
+
+
+| leet aug price
+#event Whisper "#1# whispers, 'The total cost to turn these items into an augment is #2# platinum pieces.'"
+Sub main
+
+/echo Starting Auto pp grabber :)
+/declare ItemName string outer
+/declare VendorName string outer
+/declare Price string outer
+
+
+:loop
+/delay 1
+/if (${Zone.ID}!= 185) {
+	/echo Not in Load2! Ending Macro!
+	/endm
+}
+
+/if (${Window[GiveWnd].Open} && ${Window[GiveWnd].Child[GVW_MyItemSlot0].Tooltip.Length}>0) {
+	/if (!${ItemName.Equal[${Window[GiveWnd].Child[GVW_MyItemSlot0].Tooltip}]}) {
+	/varset ItemName ${Window[GiveWnd].Child[GVW_MyItemSlot0].Tooltip}
+	/varset VendorName NULL
+	/varset Price 0
+	} else {
+		
+		/if (${VendorName.Equal[${Target.CleanName}]} && ${Price.Length}>1) {
+			/if (!${Window[GiveWnd].Child[GVW_MyMoney0].Text.Equal[${Price}]}) {
+			
+				/call GrabCash ${Price}
+				
+				/nomodkey /notify GiveWnd GVW_MyMoney0 leftmouseup
+				/delay 10s !${Cursor.ID} && ${Window[GiveWnd].Child[GVW_MyMoney0].Text.Equal[${Price}]}
+			}
+		
+		}
+	}
+}
+/doevents
+/goto :loop
+
+
+/return
+
+Sub Event_Whisper(Line,Sender,Cost)
+
+
+
+/varset VendorName ${Sender}
+/if (${Me.Platinum}>= ${Int[${Cost}]}) {
+	/varset Price ${Cost}
+} else {
+	/echo You can't afford to aug ${ItemName}
+	/varset Price 0
+	/varset VendorName NULL
+}
+/return
+
+Sub GrabCash(string GrabCount)
+  /declare i int local
+  /declare j int local
+  /declare itemp int local
+  
+  :waitForInv
+  /if (!${Window[InventoryWindow].Open}) {
+	/nomodkey /keypress i
+	/delay 3s ${Window[InventoryWindow].Open}
+	/if (!${Window[InventoryWindow].Open}) /goto :waitForInv
+  }
+  :waitForSlider
+  
+  /nomodkey /notify InventoryWindow IW_Money0 leftmouseup
+    
+  /delay 2s ${Window[QuantityWnd].Open}
+  /varset j ${Window[QuantityWnd].Child[QTYW_SliderInput].Text.Length}
+  /for i 1 to ${j}
+    /varset itemp ${Window[QuantityWnd].Child[QTYW_SliderInput].Text.Length}
+    /nomodkey /keypress backspace chat
+    /delay 3s ${Window[QuantityWnd].Child[QTYW_SliderInput].Text.Length}!=${itemp}
+  /next i
+  /for i 1 to ${GrabCount.Length}
+    /nomodkey /keypress ${GrabCount.Mid[${i},1]} chat
+    /delay 3s ${Window[QuantityWnd].Child[QTYW_SliderInput].Text.Length}==${i}
+  /next i
+  /nomodkey /notify QuantityWnd QTYW_Accept_Button leftmouseup
+ 
+  /delay 3
+/return

@@ -1,0 +1,45 @@
+
+#include a2.inc
+
+Sub Main
+
+/if (${Defined[Param0]}) {
+	/if ( ${Param0.Equal[tov]} ) /call GoZone ZoneToV
+	/if ( ${Param0.Equal[kael]} ) /call GoZone ZoneKael
+	/if ( ${Param0.Equal[vt]} ) /call GoZone ZoneVexThal
+	/if ( ${Param0.Equal[karnor]} ) /call GoZone ZoneKarnor
+	/if ( ${Param0.Equal[st]} ) /call GoZone ZoneSleeper
+	/if ( ${Param0.Equal[cb]} ) /call GoZone ZoneCrushbone
+	/if ( ${Param0.Equal[shadow]} ) /call GoZone "ZoneShadowrest"
+	/if ( ${Param0.Equal[droga]} ) /call GoZone ZoneDroga
+	/if ( ${Param0.Equal[seb]} ) /call GoZone ZoneSeb
+	/if ( ${Param0.Equal[sad]} ) /call GoZone ZoneSAD
+	/if ( ${Param0.Equal[bk]} ) /call GoZone BloodyKithicor
+	/if ( ${Param0.Equal[oc]} ) /call GoZone ZoneOC
+	/if ( ${Param0.Equal[perm]} ) /call GoZone GotoPermafrost
+	/if ( ${Param0.Equal[com]} ) /call GoZone ZoneCOM
+} else {
+	/echo Go to zone... /macro goto xxx
+	/echo tov - Temple of Veeshan HC
+	/echo kael - Kael HC
+	/echo vt - Vex Thal
+	/echo karnor - Karnor's Castle HC
+	/echo st - Sleeper's Tomb HC
+	/echo cb - Crushbone HC
+	/echo shadow - 
+	/echo droga - 
+	/echo seb - Sebilis HC
+	/echo sad -
+	/echo bk - Bloody Kithicor
+	/echo oc - Old Commons
+	/echo perm - Permafrost HC
+	/echo com - City of Mist
+}
+
+/return
+
+sub GoZone(zoneName)
+
+/call ${zoneName}
+/endm
+/return

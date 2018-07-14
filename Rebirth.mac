@@ -1,0 +1,301 @@
+
+#event Whisper "#1# whispers, #2#"
+#event AntiBot "Anti-bot flag has been triggered. You are locked out for 10 minutes."
+Sub Main
+/echo This Macro ONLY works on RoF client... 
+/echo It can be edited for UF.. RoF itemlinks is 49chars long UF 44.. (added slot20)
+/if (${FindItemCount[Dragon Brood Crypt Key]}==0) {
+
+/echo Need atleast one Dragon Brood Crypt Key to use this macro!
+/beep
+/endm
+
+
+}
+
+
+/declare classes[16] string outer
+/declare classLinks[16] string outer
+
+/declare parseReady int outer 0
+/declare lockoutTimer timer outer
+/declare chattTimer timer outer
+/declare chattState int outer 0
+/declare neededClass string outer none
+/declare y int outer 
+/declare lillieLockout timer outer
+/declare rebirthed int outer 
+
+/call GetClass
+/echo Starting Macro
+
+/if ( ${neededClass.Equal[none]} ) {
+
+	/echo Dude! you have all 16 class items!
+	/beep
+	/endm
+}
+
+/if (${Me.Level} <85) {
+	/echo you need to be lvl 85 to run this...
+	/beep
+	/endm
+}
+/echo Eclin's Rebirth Macro started! Next Class is ${neededClass}
+
+/if (${Param0.Length} && ${Param0.Equal[force]}) {
+
+	/call UbaidSpawned
+}
+
+ :Primeloop
+ /doevents
+ /delay 3
+ /goto :PrimeLoop
+/return
+
+|#event Ubaid "Warden Ubaid has graced us with his presence!"
+#event Ubaid "#*#This makes 0 Deaths#*#"
+Sub Event_Ubaid
+/echo Ubaid Spawned
+/beep
+/beep
+/beep
+/call UbaidSpawned
+/return
+
+sub UbaidSpawned
+
+
+:loop
+/if (${MacroQuest.GameState.Equal[INGAME]}) {
+/if ( ${Zone.ID} != 151 && ${Zone.ID} != 495 ) {
+
+	/itemnotify powersource rightmouseup
+	/delay 10s 
+}
+
+/if (${Zone.ID}==151 && ${Me.Level}==85) /call Bazaar
+/delay 30s ${Zone.ID}==495
+/if (${Zone.ID}==495) /call Dragoncrypt	
+}
+
+/if (${MacroQuest.GameState.Equal[CHARSELECT]}) /endm
+/delay 5
+/goto :loop
+/return
+
+
+sub Bazaar
+:bz
+/if (!${SpawnCount[Ward Lillie radius 10]}>=1 && ${Zone.ID}==151) /goto :LillieFar
+/if (${SpawnCount[Ward Lillie radius 10]}>=1 && ${Zone.ID}==151) /goto :LillieClose
+
+:LillieFar
+	/warp loc 127 -206 -28
+	/delay 2s
+:LillieClose
+	/if (!${SpawnCount[Ward Lillie radius 10]}>=1 && ${Zone.ID}==151) /goto :LillieFar
+	/nomodkey /keypress open_inv_bags
+	/target Ward Lillie
+	/delay 1s
+	/hail
+	/varset lillieLockout 4s
+	:lillieLockoutLoop
+	/delay 4
+	/if (!${lillieLockout}) {
+		/doevents
+		/goto :lillieLockoutLoop
+	}
+	/if (${Target.ID} && !${Stick.Status.Equal[ON]} && ${Target.Distance}<=15) /stick 5
+	/if (${Target.Name.Find[Lillie]} && ${Target.Distance}<=15) {
+		/ctrlkey /itemnotify ${FindItem[Dragon Brood Crypt Key].InvSlot} leftmouseup
+		/delay 5s ${Cursor.ID}
+		/click left target
+		/delay 20s ${Window[GiveWnd].Open}
+		
+		/delay 1s
+		:reGive
+		/notify GiveWnd GVW_Give_Button leftmouseup
+		/delay 5s !${Window[GiveWnd].Open}
+		/delay 3s
+		/if (${Window[GiveWnd].Open}) /goto :reGive
+	} else {
+		/goto :LillieClose
+		}
+/return
+
+Sub GetClass
+		
+		
+		/if (!${FindItemCount[=The Warlord]}) /varset neededClass Warrior
+		/if (!${FindItemCount[=The Lightbearer]}) /varset neededClass Paladin
+		/if (!${FindItemCount[=The Prime Healer]}) /varset neededClass Cleric
+		/if (!${FindItemCount[=The Wanderer]}) /varset neededClass Druid
+		/if (!${FindItemCount[=The Beast]}) /varset neededClass Beastlord
+		/if (!${FindItemCount[=The Composer]}) /varset neededClass Bard
+		/if (!${FindItemCount[=The Pathfinder]}) /varset neededClass Ranger
+		/if (!${FindItemCount[=The Plaguebearer]}) /varset neededClass Necromancer
+		/if (!${FindItemCount[=The Sorcerer]}) /varset neededClass Wizard
+		/if (!${FindItemCount[=The Elementalist]}) /varset neededClass Magician
+		/if (!${FindItemCount[=The Illusionist]}) /varset neededClass Enchanter
+		/if (!${FindItemCount[=The Battlerager]}) /varset neededClass Berserker
+		/if (!${FindItemCount[=The Tranquil]}) /varset neededClass Monk
+		/if (!${FindItemCount[=The Spiritist]}) /varset neededClass Shaman
+		/if (!${FindItemCount[=The Thief]}) /varset neededClass Rogue
+		/if (!${FindItemCount[=The Bringer of Darkness]}) /varset neededClass Shadowknight
+		
+		/if (${Me.Name.Equal[Denee]}) /if (!${FindItemCount[=The Warlord]}) /varset neededClass Warrior
+/return
+
+sub Dragoncrypt
+:dc
+/if (!${SpawnCount[Ubaid radius 10]}>=1 && ${Zone.ID}==495) /goto :UbaidFar
+/if (${SpawnCount[Ubaid radius 10]}>=1 && ${Zone.ID}==495) /goto :UbaidClose
+/varset chattState 0
+/varset parseReady 0
+/varset chattTimer 0
+
+
+:UbaidFar
+	/warp loc 9 713 7
+	/delay 2s
+	/goto :dc
+:UbaidClose
+	/if (${MacroQuest.GameState.Equal[CHARSELECT]} && ${rebirthed}) /endm
+	
+	/if (${MacroQuest.GameState.Equal[CHARSELECT]} && !${rebirthed}) {
+		/echo Hey! We got bumped to charselect lets log back in...
+		
+		
+		/delay 2m
+		
+		/notify CharacterListWnd CLW_Play_Button leftmouseup
+		
+		
+		/delay 2m
+		
+	
+	
+	}
+	/if (!${SpawnCount[Ubaid radius 10]}>=1 && ${Zone.ID}==495) /goto :UbaidFar
+
+	/target Ubaid
+	/delay 1s
+	
+	/if (${Target.ID} && !${Stick.Status.Equal[ON]} && ${Target.Distance}<=15) /stick 5
+	/if (${Target.Name.Find[Ubaid]} && ${Target.Distance}<=10) {
+	
+		
+		:mainUbaidLoop
+		/delay 1
+		/doevents
+		/if ( ${chattState} == 0 && !${chattTimer}) {
+			/varset parseReady 0
+			/echo Hailing Ubaid!
+			/nomodkey /keypress h
+			/varset chattState 1
+			/varset chattTimer 30s
+			
+			
+		}
+		
+		/if (${chattState} == 1 && ${parseReady}) {
+			/delay 1s
+			|/if (${classes[1].Find[Rebirth]}) {
+				/varset parseReady 0
+				/echo Clicking the Rebirth Link
+				/notify ChatWindow CW_ChatOutput link ${classLinks[1]}
+				/varset chattTimer 30s
+				/varset chattState 2
+			|}
+		}
+		
+		/if (${chattState}==2 && ${parseReady}) {
+			/delay 1s
+			|/if (${classes[1].Find[choose]}) {
+				/varset parseReady 0
+				/echo Clicking the choose Link
+				/notify ChatWindow CW_ChatOutput link ${classLinks[1]}
+				/varset chattTimer 30s
+				/varset chattState 3
+			|}
+		}
+		
+		/if (${chattState}==3 && ${parseReady}) {
+			/delay 5s
+			/for y 1 to 16
+				/if (${classes[${y}].Find[${neededClass}]}) {
+					/varset chattState 4
+					/varset chattTimer 2m
+					/echo Clicking the ${neededClass} Link... Cross your fingers!
+					/notify ChatWindow CW_ChatOutput link ${classLinks[${y}]}
+					/varset rebirthed 1
+				}
+			/next y
+		}
+		
+		/if (${chattState}==4 && !${chattTimer}) {
+			/varset chattState 3
+			
+		}
+		
+		/if (${chattState}==1 && !${chattTimer} && !${parseReady}) {
+			/varset chattState 0
+		}
+		
+		/if (${chattState}==2 && !${chattTimer} && !${parseReady}) {
+			/varset chattState 1
+		}
+		
+		/if (${chattState}==3 && !${chattTimer} && !${parseReady}) {
+			/varset chattState 2
+		}
+		/doevents
+		/if ( ${Me.Level}==85 && ${Zone.ID}==495 ) /goto :mainUbaidLoop
+		
+	} else {
+		/goto :UbaidClose
+		}
+/return
+
+
+Sub parseUbaid(message)
+/declare x int local
+/declare linkStart int local
+/declare linkEnd int local
+/declare tempLabel string local
+/declare classCounter int local 1
+/for x 1 to ${message.Length}}
+
+/if (${message.Mid[${x},1].Equal[|]} && ${message.Mid[${Math.Calc[${x}+2]},1].Equal[0]}) {
+	/varset linkStart ${Math.Calc[${x}+3]}
+	/varset linkEnd ${Math.Calc[${linkStart}+3+52]}
+	/varset tempLabel ${message.Mid[${linkEnd},${Math.Calc[${message.Mid[${linkEnd},15].Find[|]}-1]}]}
+	/varset classes[${classCounter}] ${tempLabel}
+	/varset classLinks[${classCounter}] ${message.Mid[${linkStart},${Math.Calc[${linkEnd}-${linkStart}]}]}
+	/varset classCounter ${Math.Calc[${classCounter}+1]}
+	|/echo Label:${tempLabel} Link:${message.Mid[${linkStart},${Math.Calc[${linkEnd}-${linkStart}]}]}
+} 
+/next x
+/varset parseReady 1
+/delay 3
+/return
+
+Sub Event_AntiBot(line)
+	/varset chattTimer 11m
+	/echo Fuck! we are antibot flagged, sleeping for 11m then we try again!
+	/varset chattState 0
+	/varset parseReady 0
+/return
+
+Sub Event_Whisper(line, inviter, message)
+|/echo ${inviter} ${message}
+/if (${inviter.Find[Ward Lillie]} && ${message.Find[You are currently locked out of Dragon Crypt]} ) {
+	/echo Locked out! sleeping for 1m
+	/varset lillieLockout 1m
+	
+}
+|/varset parseReady 0
+/call parseUbaid "${message.Replace[ ,|].Replace[[,|].Replace[],|]}"
+/return

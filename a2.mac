@@ -1,0 +1,1410 @@
+
+|#turbo 40
+#include Ninjadvloota2.inc
+
+#include a2.inc
+#include Leet.inc
+#include spell_routines.inc
+
+#event TargetOoR "#*#Your target is too far away, get closer!#*#"
+#event TargetOoR "#*#You cannot see your target.#*#"
+
+
+|Hail after warp. Helps with resyncing after warp
+#define hailIt 1
+|#of inventory slots free to trigger a sell
+#define FreeInventorySlots 7
+|1297 276 4
+
+|droga T1 88 88 49 # 104
+|droga T1 88 88 0 90 90 58 # 106
+
+
+
+/return
+sub Main
+/echo PotionBelt order HoT,DH,Exp potion
+ /call SetupAdvLootVars
+
+ /call AddAlerts
+/echo test auto
+ |Pet heal
+ 
+ /declare PetHealPct int outer 0    | set to 0 to disable pet heals
+ /declare PetHeal string outer Revival of Leetness 1
+
+|How long before mob is stuck? in seconds|
+
+
+
+ /declare KillTime int outer 60
+ /declare pcRadiusAvoid int outer 30
+
+
+|Alerts are defined in the Auto.Inc. Will not kill mobs on alert list 1, have to go to the auto.inc to add alerts. Alerts are cleared when logging.|
+
+
+
+ /declare KillZone int outer ${Zone.ID}
+
+ /declare AntiDrogaMobs int outer 0
+ /declare AntiDrogaBotAvoidRange int outer 100
+ /declare AntiDrogaMobLevel int outer 105
+ /declare DrogaInstanceTier int outer 0
+ /declare DrogaInstanceLinks[10] string outer 
+ /declare DrogaTimer timer outer
+ 
+ 
+ /declare ReclaimInvOpenOnce int outer 0
+|How many levels below or above you want to kill|
+
+ /declare MinLVL int outer 85
+
+ /declare MaxLVL int outer 125
+
+ /declare DeathCounter int outer 0
+ 
+ /declare ZoneIDStarted int outer ${Zone.ID}
+
+ /declare OoRRetargetTimer timer outer
+
+|Calculated as the macro runs and your level changes|
+
+ /declare TargMin int outer
+
+ /declare TargMax int outer
+
+
+
+
+/declare spamTimer timer outer
+|How far and how high to target|
+
+ /declare MaxRad int outer 2000
+
+ /declare MaxZ	int outer 500
+
+
+
+|Radius for add control|
+
+ /declare MaxRad2 int outer 30
+
+ /declare MaxZ2 int outer 50
+
+/declare regExpDone int outer 0
+
+|Defined priority of mobs to kill|
+
+ /declare Mob1 string outer 
+
+ /declare Mob2 string outer 
+
+ /declare Mob3 string outer
+
+ /declare Mob4 string outer
+
+ /declare Mob5 string outer 
+
+
+
+ /declare MobCount int outer 5
+
+ 
+
+
+
+ /declare mo int outer
+
+ /declare npcID int outer
+
+ /declare KillMob string outer 
+
+ 
+
+
+
+	/hidec looted
+
+
+ /melee on
+
+ /declare CastTimer timer outer
+
+ /declare CeleTimer timer outer
+
+ /declare DivineTimer timer outer
+
+ /declare EpicTimer timer outer
+
+ /declare SpawnTimer timer outer
+
+ /declare KillTimer timer outer
+
+ /declare RageTimer timer outer
+
+ /declare FuryTimer timer outer
+
+ /declare ChestTimer timer outer
+
+ /declare BeepTimer timer outer
+
+ /declare WaitTimer timer outer
+
+ /declare AlertTimer timer outer
+
+ /declare HealHot timer outer
+ 
+ /declare HealDir timer outer
+
+ /declare FadeCount int outer
+
+ 
+
+|DoLoot turns looting on or off|
+
+ /declare DoLoot int outer 1
+
+
+
+|Can define the parameters here, will override anything declared|
+
+|Have to be in order, /mac auto 1 trakanon, will not work. /mac auto 1 5000 trakanon, will prioritize trak in radius of 5000, and turn on looting. If not defined will default to values set above||
+
+ /if (${Defined[Param0]}) /varset DoLoot ${Param0}
+
+ /if (${Defined[Param1]}) /varset MaxRad ${Param1}
+ /declare parmLoop int local
+ |/if (${Defined[Param2]}) /varset Mob1 ${Param2}
+ |/if (${Defined[Param3]}) /varset Mob2 ${Param3}
+ |/if (${Defined[Param4]}) /varset Mob3 ${Param4}
+ |/if (${Defined[Param5]}) /varset Mob4 ${Param5}
+ |/if (${Defined[Param6]}) /varset Mob5 ${Param6}
+ /for parmLoop 2 to 6
+	/if (${Param${parmLoop}.Length}>0) {
+		
+		/if (${Param${parmLoop}.Find[droga]}) {
+			/echo Setting zone started to Droga
+			/varset ZoneIDStarted 81
+			/varset KillZone 81
+			/if (${Param${parmLoop}.Length}>5) {
+				/if (!${Defined[DrogaSelectedInstanceTier]}) /declare DrogaSelectedInstanceTier int outer 0
+				/varset DrogaSelectedInstanceTier ${Param${parmLoop}.Mid[6,2]}
+			}
+			/echo ZoneIDStarted:${ZoneIDStarted}
+			/next parmLoop
+			} 
+		/if (${Param${parmLoop}.Equal[com]}) {
+			/varset ZoneIDStarted 90
+			/varset KillZone 90
+			/next parmLoop
+			} 
+		/varset Mob${Int[${Math.Calc[${parmLoop}-1]}]} ${Param${parmLoop}}
+		|/echo ${Mob${Int[${Math.Calc[${parmLoop}-1]}]}}
+			
+		
+	}
+/next parmLoop
+
+|Just draws a circle on the map with the kill radius|
+
+ /mapfilter castradius ${MaxRad}
+
+
+
+|Chest Buffs|
+
+ /declare DoCritBuff int outer 0
+
+ /declare DoBlades int outer 0
+
+
+
+|If you want looting off, but turned on when you kill a named, LootNamed turns looting on for named mobs only, overrides DoLoot|
+
+ /declare LootNamed int outer 0
+
+
+
+ /if (${DoLoot} && !${LootNamed}) /echo Looting on for all.
+
+ /if (${LootNamed}) /echo Looting on for named mobs only.
+
+ /if (!${DoLoot} && !${LootNamed}) /echo Looting off for all.
+
+ /if (${DoCritBuff}) /echo Crit Buff is on.
+
+ /if (!${DoCritBuff}) /echo Crit Buff is off.
+
+ /if (!${DoBlades}) /echo Bladestorm is off.
+
+ /if (${DoBlades}) /echo Bladestorm is on.
+
+ 
+
+ /call BuffCheck
+
+
+
+ /squelch /target clear
+
+ /varset AlertTimer 7m
+
+/if ( ${Zone.ID}==81) /call SetDrogaLevel
+
+/if (${Window[InventoryWindow].Child[AltCurr_PointList].Items}==0 ) {
+	
+	/if (!${Window[InventoryWindow].Open}) /nomodkey /keypress i
+	/delay 10s ${Window[InventoryWindow].Open}
+	/notify InventoryWindow IW_Subwindows tabselect 5
+	/delay 3s ${Window[InventoryWindow].Child[AltCurr_PointList].Items}
+	/notify InventoryWindow IW_Subwindows tabselect 1
+}
+:startpoint
+
+
+
+/call ZoneCheck
+
+
+
+/doevents
+
+
+
+
+
+
+
+/if (${Target.Name.Equal[${Me.Name}]}) {
+
+ /echo Me
+
+ /squelch /target clear
+
+ /goto :startpoint
+
+ }
+
+ 
+
+/if (${Target.ID} && ${Target.Type.Equal[NPC]}) {
+
+ /vardata npcID Target.ID
+
+ /if (${Target.Distance}>30) {
+
+ /warp t
+
+ /delay 2
+
+ }
+
+ /squelch /tar clear
+
+ /delay 5
+
+ /target ID ${npcID} range ${TargMin} ${TargMax}
+
+ /face fast nolook
+
+ /stick 7 moveback
+
+ /delay 3
+
+ /call combat
+
+ }
+
+
+
+/if (${Target.ID} && ${Target.Type.Equal[PC]}) {
+
+ /echo PC
+
+ /squelch /target clear
+
+ }
+
+
+
+/doevents
+
+:wait
+
+
+
+/if (${SpawnCount[NPCCorpse range ${TargMin} ${TargMax}]}>30) {
+
+ /hidec all
+
+ /hidec looted
+
+ }
+
+
+
+/if (!${AlertTimer}) {
+
+ /call AddAlerts
+
+ /varset AlertTimer 7m
+
+ |/delay 2s
+
+ }
+
+
+
+/doevents
+
+
+
+/call Buffcheck
+
+/call Zonecheck
+
+
+
+/varset TargMin ${Math.Calc[${Me.Level}-${MinLVL}]}
+
+/if (${TargMin}<0) /varset TargMin 1
+
+/varset TargMax ${Math.Calc[${Me.Level}+${MaxLVL}]}
+
+
+
+/for mo 1 to ${MobCount}
+
+ /if (${SpawnCount[npc ${Mob${mo}} radius ${MaxRad} zradius ${MaxZ} targetable noalert 1 range ${TargMin} ${TargMax}]}<1) {
+
+ /echo No ${Mob${mo}}
+
+ /if (${mo}==${MobCount}) {
+
+ /echo ${mo}
+ /echo Waiting on spawns, level range ${TargMin} to ${TargMax}.
+
+ /varset FadeCount 0
+
+ /warp succor
+
+ /varset WaitTimer 3s
+
+ /doevents
+
+ /goto :Waiting
+
+ }	
+
+ /next mo
+
+ }
+
+
+|			// Target Selection .. 
+ /if (${SpawnCount[npc ${Mob${mo}} radius ${MaxRad} zradius ${MaxZ} targetable  noalert 1 range ${TargMin} ${TargMax} ]}>=1) {
+
+ 
+ /vardata npcID NearestSpawn[npc ${Mob${mo}} radius ${MaxRad} zradius ${MaxZ} targetable noalert 1 range ${TargMin} ${TargMax} ].ID
+ 
+ /if ( ${Zone.ID}==81) {
+ 
+	/if (${SpawnCount[pc notid ${Me.ID}]}>0) {
+	
+	/vardata npcID Spawn[id ${npcID}].NearestSpawn[${Math.Calc[1+${Math.Rand[5]}]},npc ${Mob${mo}} radius ${MaxRad} zradius ${MaxZ} targetable noalert 1 range ${TargMin} ${TargMax} ].ID
+	}
+	|//droga boss check
+	/call CheckDrogaBosses
+	/if ( ${Macro.Return} > 0) /varset npcID ${Macro.Return}
+	
+	|/call AvoidDrogaAntiBot
+	|/if ( ${Macro.Return} > 0) /varset npcID ${Macro.Return}
+	
+	/if (${AntiDrogaMobs}) {
+		/call LeaveDrogaInstance
+		|/echo LEAVE ENTERED!
+	}
+ }
+ /call AvoidPCPlayer
+  /if (${Macro.Return}>0) /varset npcID ${Macro.Return}
+
+ /call GetTargetFromXTarget
+ 
+ /if (${Macro.Return}>0) /varset npcID ${Macro.Return}
+ 
+
+ /goto :KillMob
+
+ }
+
+
+
+:KillMob
+
+/if (${npcID}==0) /goto :startpoint
+
+/echo KillMob ${Spawn[id ${npcID}].CleanName} id:${npcID}
+ /warp loc ${Math.Calc[${Spawn[id ${npcID}].Y}-3]} ${Math.Calc[${Spawn[id ${npcID}].X}-3]} ${Spawn[id ${npcID}].Z}
+ /delay 1s ${Spawn[id ${npcID}].Distance}<9
+ /target id ${npcID} range ${TargMin} ${TargMax}
+ /if ( hailIt) /hail
+ 
+ 
+
+
+
+ 
+
+
+
+/if (${Target.ID} && ${Target.Type.Equal[NPC]}) {
+
+ /stick 7 moveback
+
+ /delay 2
+
+ /call combat
+
+ }
+
+
+
+/goto :startpoint
+
+
+
+
+
+
+
+
+
+:Waiting
+
+
+
+/if (!${AlertTimer}) {
+
+ /call AddAlerts
+
+ /varset AlertTimer 7m
+
+ /delay 2s
+
+ }
+
+
+
+/call ZoneCheck
+
+
+
+/if (${Target.Type.Equal[NPC]}) /goto :startpoint
+
+
+
+/for mo 1 to ${MobCount}
+
+ /if (${SpawnCount[npc ${Mob${mo}} radius ${MaxRad} zradius ${MaxZ} targetable noalert 1 range ${TargMin} ${TargMax}]}) /goto :startpoint
+
+/next mo
+
+
+
+/stand
+
+/delay 10s ${Target.ID}
+
+/goto :Waiting
+
+
+
+/return
+
+
+
+Sub Combat
+
+ /if (${LootNamed}) /varset DoLoot 0
+
+
+
+ :kill_outer
+
+ /varset KillTimer ${KillTime}s
+
+ /call Zonecheck
+
+ /doevents
+
+ /if (${Corpse.Open}) {
+	 /nomodkey /notify LootWnd LW_DoneButton leftmouseup
+
+	 /delay 1s !${Corpse.Open}
+ }
+
+
+ :have_target
+
+ /call ZoneCheck
+
+ /doevents
+
+ /if (${Target.ID}) {
+
+ /if (${Target.Type.Equal[Corpse]}) {
+
+ /echo Corpse
+
+ /target clear
+
+ }
+ 
+ /if (${Target.CleanName.Equal[a steadfast servant]}) {
+	/target clear
+ 
+ }
+
+
+
+ /if (${Target.ID} && ${Target.Type.Equal[PC]}) {
+
+ /echo PC
+
+ /squelch /target clear
+
+ }
+
+
+
+
+
+ /if ((${Target.Named} || ${Target.Name.Left[1].Equal[#]}) && ${LootNamed}) {
+
+ /varset DoLoot 1
+
+ /varset CorpseRadius 30
+
+ }
+
+
+
+ /if (!${Me.Standing}) /stand
+
+
+
+
+
+ /if (${Target.ID} && !${Stick.Status.Equal[ON]}) {
+
+ /stick 12 moveback 
+
+ /face fast nolook
+
+ }
+
+
+
+ /if (${Target.ID} && ${Target.Distance}<76 && !${Me.Combat} && !${Melee.Enrage} && ${Melee.Status.NotEqual[ESCAPING]}) {
+
+ /face fast nolook
+
+ /attack on
+
+ }
+
+
+/if (${Target.ID} && ${Target.Name.Length}<=3 && ${Int[${Target.Name}]}>0) {
+	
+	|Ldon Trap mob if we only have one aggro mob sit down and let it kill it self.
+	/call CheckXTarget
+	/if (${Macro.Return}==1) {
+		/attack off
+		/sit
+		/delay 2s !${Target.ID}
+	}
+}
+ 
+
+ /if (${Target.Distance}>50) {
+
+ /warp target
+
+ }
+
+ /if (${Zone.ID}==397) {
+	/if (${Me.Pet.Distance} >= 100 && ${Me.AltAbilityReady[Summon Companion]}) {
+		|/alt act 1215
+		/nomodkey /keypress 4
+		/delay 1s !${Me.AltAbilityReady[Summon Companion]}
+	}
+}
+
+/if (${Zone.ID}==81) {
+	|Droga checks
+	
+	/call AvoidDrogaAntiBot
+	/if (${AntiDrogaMobs}>0) /call LeaveDrogaInstance
+}
+ /if (${Target.ID} && !${Target.LineOfSight}) {
+
+ /warp target
+
+ /delay 5
+
+ }
+
+ 
+
+| /if (${Target.ID} && !${Target.Type.Equal[PC]} && !${Target.CleanName.Right[9].Equal['s Corpse]} && ${Target.DistanceZ}>50 && ${Target.Distance} < 20) {
+
+| /warp target
+
+| /delay 5
+
+| }
+
+/if (${Me.Pet.ID} && !${spamTimer}) {
+
+ /squelch /pet attack
+	/varset spamTimer 1s
+} 
+
+ /if (!${KillTimer} && ${Target.ID} && ${Target.PctHPs}>95) {
+
+ /varset npcID ${Target.ID}	
+
+ /if (${npcID}) /alert add 1 ID ${npcID}
+
+| /warp wp clear
+
+ /delay 2
+
+ /squelch /tar clear
+
+ }
+ 
+
+
+ /if (!${Me.Buff[Bladestorm Attunement].ID} && ${FindItemCount[=Perspicuous Coat of the Swift]} && !${ChestTimer} && ${DoBlades}) {
+
+ /itemnotify chest rightmouseup	
+
+ /varset ChestTimer 1s
+
+ /delay 1s ${Me.Buff[Bladestorm Attunement].ID}
+
+ /delay 5
+
+ }
+
+
+
+ /if (!${EpicTimer} && ${Cast.Ready[Warwolf`s Cry of Torment]}) {
+
+ /delay 5
+
+ /itemnotify mainhand rightmouseup
+
+ /varset EpicTimer 100s
+
+ /delay 5
+
+ }
+
+ /if (!${HealHot} && !${Me.Song[Elixir of Healing XVII].Duration} && ${Cast.Ready} ) {
+	
+	/potionbelt activate 1
+	/varset HealHot 5
+ }
+ 
+ /if (${FindItemCount[Divine Healing XV]}>0 &&  ${FindItem[Divine Healing XV].TimerReady} == 0 && ${Me.PctHPs} <= 95 && ${Cast.Ready}) {
+	
+	/potionbelt activate 2
+	
+ }
+ 
+ /if ( ${FindItem[Frosted Cuirass of Enlightenment].ID}>0 && ${Me.Song[Circle of Power III].Duration}<=3 && ${Cast.Ready}) {
+	/itemnotify chest rightmouseup
+ }
+ /call dispell_with_ring
+ /goto :have_target
+
+ }
+
+
+
+ /if (${SpawnCount[npc radius ${MaxRad2} zradius ${MaxZ2} targetable noalert 1 range ${TargMin} ${TargMax}]}) {
+
+ /squelch /tar npc radius ${MaxRad2} zradius ${MaxZ2} targetable noalert 1 range ${TargMin} ${TargMax}
+
+ }
+
+
+
+
+
+ /if (${Target.ID}) {
+
+ /goto :kill_outer
+
+ }
+
+
+
+/if (${DoLoot}) {
+
+ /delay 3
+ /call CheckXTarget
+ 
+ /if (${Macro.Return} < 1 ) /call LootTime 
+
+ }
+
+
+
+/return
+
+
+
+
+
+Sub LootTime
+
+ /call Zonecheck
+ 
+ 
+ /call LootMobs
+ /call ReclaimCurrency
+ /call CheckXTarget
+ 
+ /if (${Me.FreeInventory}<FreeInventorySlots && ${Macro.Return} < 1) {
+
+ /call Warren 
+
+ }
+
+
+
+ /if (${FindItemCount[Enigmatic Armor Package]}) /call Enigmatic
+
+ /if (${FindItemCount[Droga Armor Package]}) /call DrogaPackage
+
+
+
+
+
+/return
+
+
+Sub CheckGroupLevel
+/declare gr int local
+/declare grDone int local 1
+
+/if (${Me.Level}==85 && !${regExpDone} ) {
+	/alt on 100
+	/varset regExpDone 1
+
+}
+/if ( ${Me.Grouped}) {
+/for gr 1 to ${Group}
+
+/if ( ${Group.Member[${gr}].Level}<85) /varset grDone 0
+} else {
+
+/if (${Me.Level}<85) /varset grDone 0
+}
+/return ${grDone}
+
+
+Sub Zonecheck
+
+/doevents
+
+
+
+/if (${Zone.ID}== 442) {
+/call CheckGroupLevel
+
+/if (${Macro.Return}) {
+	/warp s
+	/delay 1s
+	/alt on 100
+	/delay 1s
+	/beep
+	/endm
+	}
+
+}
+
+
+
+/if (${Zone.ID} == 81 && ${SpawnCount[npc Caridwi]}) {
+	|so i can test standing in normal droga
+	/goto :zoneDrogaFunc
+}
+/if (${Zone.ID}!=${KillZone}) {
+
+/echo Wrong zone!
+ /if (${ZoneIDStarted}==90) {
+ 
+	/echo Returning to City Of Mist
+	
+	/call ZoneCOM
+	
+	/delay 2s
+	/warp wp safe
+	/varcalc DeathCounter ${Math.Calc[${DeathCounter}+1]}
+	/timed 30s /macro a2 1 2000 named
+	|/goto :startpoint
+ }
+ 
+ /if (${ZoneIDStarted}==81) {
+	:zoneDrogaFunc
+	/if (${DrogaTimer}) {
+		/echo Droga AntiBot time out! .: ${Int[${Math.Calc[${DrogaTimer}/600]}]}min left :.
+		/delay 1m
+		/goto :zoneDrogaFunc
+	}
+	/echo Returning to Droga in 10s
+	/beep
+	/delay 10s
+	/call ZoneDroga
+	/delay 1m
+	/call SetDrogaLevel
+	/varset AntiDrogaMobs 0
+	
+	/return
+ }
+
+ /attack off
+
+ /stick off
+
+ /delay 2s
+
+ /beep
+
+ /beep 
+
+ /endm
+
+ }
+
+:Done
+
+/return
+
+
+
+
+
+Sub MedBreak
+
+ 
+
+ /target clear
+
+ /if (!${Me.Sitting}) /sit
+
+ /echo Medbreak
+
+
+
+:medloop
+
+ /doevents
+
+ /if (${Target.Type.Equal[NPC]}) /goto :LeaveMed
+
+ /delay 5
+
+ /if (!${Me.Sitting}) /sit
+
+ /delay 1s
+
+ 
+
+ /if (${Me.PctHPs}<95) /goto :medloop
+
+ :LeaveMed
+
+
+
+/return
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sub Warren
+
+
+
+:Warren
+/call GetTargetFromXTarget
+/if (${Macro.Return} > 0 ) {
+	
+	/squelch /target id ${Macro.Return}
+	/delay 2
+}
+	
+ /if (${Target.ID} && ${Target.Type.Equal[NPC]}) {
+
+ /call combat
+
+ /delay 1s
+
+ /goto :Warren
+
+ }
+
+
+
+
+
+/if (${SpawnCount[npc steadfast radius 50]}) /goto :sell
+
+/if (${SpawnCount[NPC merchant noalert 3]}) /goto :merchant2
+
+/if (!${Me.AltAbilityReady[Steadfast Servant]}) {
+
+ /delay 10s
+
+ /goto :Warren
+
+ }
+
+ 
+
+:Merchant
+
+
+
+ /if (${Me.AltAbilityReady[Steadfast Servant]}) {
+
+ /alt act 485
+
+ /delay 20s ${SpawnCount[NPC Steadfast radius 50 noalert 3]}
+
+ /goto :Merchant
+
+ }
+
+
+
+/delay 2s
+
+/goto :sell
+
+
+
+:sell
+/if (!${Target.CleanName.Equal[a Steadfast Servant]}) /tar NPC Steadfast 
+
+/delay 3
+
+/if (${Target.Distance}>10) {
+
+ |/squelch /tar clear
+
+ /goto :sell
+
+ }
+
+
+
+/if (${Target.CleanName.Equal[a Steadfast Servant]}) {
+
+ /delay 5
+
+ /face fast nolook
+
+ /stick 7 moveback
+
+ /delay 1s
+
+ /keypress OPEN_INV_BAGS
+
+ |/sellstuff
+ /call DoLootStuff sell
+
+ /doevents
+
+ /delay 1s
+
+ }
+
+/call ReclaimCurrency
+
+/goto :stopsell
+
+
+
+:Merchant2
+
+
+
+ /tar NPC merchant noalert 3
+
+ /delay 5
+
+ /warp t
+
+ /delay 2s
+
+ /face fast nolook
+
+ /stick behind
+
+ /delay 1s
+
+ /doability sneak
+
+ /delay 5
+
+ /keypress OPEN_INV_BAGS
+
+ /sellstuff
+
+ /doevents
+
+
+
+ /if (${Me.FreeInventory}<FreeInventorySlots && ${Target.ID} && !${Me.Combat}) {
+
+ /alert add 3 id ${Target.ID}
+
+ /squelch /tar clear
+
+ /delay 2
+
+ /goto :warren
+
+ }
+
+
+
+:sneak off
+
+ /if (${Me.Sneaking}) {
+
+ /doability sneak
+
+ /delay 5
+
+ /goto :sneak off
+
+ }
+
+
+
+ /delay 1s
+
+
+
+
+
+/goto :stopsell
+
+
+
+:stopsell
+
+/squelch /tar clear
+
+/delay 5
+
+
+
+/return
+
+
+
+/return
+
+
+Sub Enigmatic
+
+
+/keypress OPEN_INV_BAGS
+
+/windowstate InventoryWindow open
+
+/delay 1s
+
+/if ( ${Cursor.ID} ) /autoinv
+
+/nomodkey /itemnotify ${FindItem[=Enigmatic Armor Package].InvSlot} rightmouseup
+
+/delay 5s ${Cursor.ID}
+/delay 3
+/if ( ${Cursor.ID} ) /autoinv
+
+/return
+
+
+Sub EnigmaticOld
+
+/keypress OPEN_INV_BAGS
+
+/windowstate InventoryWindow open
+
+/delay 1s
+
+/ctrl /itemnotify ${FindItem[=Enigmatic Armor Package].InvSlot} leftmouseup
+
+/delay 1s
+
+/if (${Cursor.Name.Find[Armor Package]}) /itemnotify pack8 leftmouseup
+
+/delay 3s !${Cursor.Name.Find[Armor Package]}
+
+/itemnotify ${FindItem[=Enigmatic Armor Package].InvSlot} rightmouseup
+
+/delay 2s
+
+:cursorEnig
+
+ /if (${Cursor.ID} && !${Cursor.Container}) {
+
+ /autoinv
+
+ /goto :cursorEnig
+
+ } else { 
+ 
+	/itemnotify pack8 leftmouseup
+	/delay 1s
+	/if ( ${Cursor.ID} !${Cursor.Container}) {
+		/goto :cursorEnig
+	}
+ }
+
+
+
+
+
+/return
+
+
+
+Sub DrogaPackage
+
+
+/keypress OPEN_INV_BAGS
+
+/windowstate InventoryWindow open
+
+/delay 1s
+
+/if ( ${Cursor.ID} ) /autoinv
+
+/nomodkey /itemnotify ${FindItem[=Droga Armor Package].InvSlot} rightmouseup
+
+/delay 5s ${Cursor.ID}
+/delay 3
+/if ( ${Cursor.ID} ) /autoinv
+
+/return
+
+Sub DPOld
+/return
+/declare currItemId int local
+
+/keypress OPEN_INV_BAGS
+
+/windowstate InventoryWindow open
+
+/delay 1s
+
+/ctrl /itemnotify ${FindItem[=Droga Armor Package].InvSlot} leftmouseup
+
+/delay 1s
+
+/if (${Cursor.Name.Find[Armor Package]}) /itemnotify pack8 leftmouseup
+
+/varset currItemId ${Cursor.ID}
+/delay 3
+
+/itemnotify ${FindItem[=Droga Armor Package].InvSlot} rightmouseup
+
+/delay 12s ${Cursor.ID}!=${currItemId}
+
+:cursor2
+/delay 3
+ /if (${Cursor.ID} && !${Cursor.Container}) {
+
+ /autoinv
+ /delay 5
+/delay 1s ${Cursor.ID}
+/if (${Cursor.ID} /goto :cursor2
+
+ } else { 
+	/varset currItemId ${Cursor.ID}
+	/itemnotify pack8 leftmouseup
+	/delay 5
+	/delay 5s ${Cursor.ID}
+	/if ( ${Cursor.ID}) {
+		/goto :cursor2
+	}
+ }
+
+
+
+
+
+/return
+
+Sub dispell_with_ring
+	/if (${FindItemCount[Ring of Slaughtering Cures]} == 0 || ${FindItem[Ring of Slaughtering Cures].TimerReady}>0 ) /return
+	/if (${Me.Buff[Tashania].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
+	/if (${Me.Buff[Clamor of Tashan Rk. III].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
+	/if (${Me.Buff[Cacophony of Pain].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
+	/if (${Me.Buff[Searing Paper Cuts].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
+	/if (${Me.Song[Devastating Wound].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
+	/if (${Me.Buff[Blood of Saryrn].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
+	/if (${Me.Buff[Injected Poison I].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
+	/if (${Me.Buff[Breath of Ultor].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
+	/if (${Me.Buff[Malicious Decay].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
+/return
+
+sub Event_TargetOoR
+|/echo event Target called!
+/declare radius int 10 local
+	/declare angle int 0 local
+/if (!${OoRRetargetTimer} ) {
+	/call CheckXTarget
+	/if (${Macro.Return} > 1) {
+		/declare currAggoCount int local ${Macro.Return}
+		/call GetCurrTargetAggroListPos
+		/declare lastTarget int local ${Macro.Return}
+		
+		/if ( ${currAggoCount} == ${lastTarget}) {
+			/target id ${Me.XTarget[${x}].ID} 
+			/warp loc ${Math.Calc[${Target.Y}+2]} ${Math.Calc[${Target.X}+2]} ${Math.Calc[${Target.Z}+2]} 
+			/varset OoRRetargetTimer 1s
+			/return
+		}
+		
+		/declare x int local
+		/for x 1 to 13
+			/if ( ${Me.XTarget[${x}].ID} > 0 && !${Spawn[id ${Me.XTarget[${x}].ID}].Type.Equal[Untargetable]} && ${Spawn[id ${Me.XTarget[${x}].ID}].Type.Equal[NPC]}) {
+				/if ( ${x}>${lastTarget}) {
+					/target id ${Me.XTarget[${x}].ID} 
+					/warp loc ${Math.Calc[${Target.Y}+2]} ${Math.Calc[${Target.X}+2]} ${Math.Calc[${Target.Z}+2]} 
+					/varset OoRRetargetTimer 1s
+					/return
+				}
+			}
+		/next x
+		|/varset OoRRetargetTimer 1s
+	}
+	
+	|/echo preang: ${Target.Heading.DegreesCCW}
+	/varcalc angle ${Target.Heading.DegreesCCW}+45
+	|/echo prean:${angle}
+	/if (${angle} > 360) /varcalc angle ${angle}-360
+	/if (${angle} < 0) /varset angle ${angle}+360
+	|/echo postangle:${angle}
+	/call WarpPointOnCircle ${Target.ID} ${angle} ${radius}
+	/return
+} else {
+
+	|/warp loc ${Math.Calc[${Target.Y}+2]} ${Math.Calc[${Target.X}+2]} ${Math.Calc[${Target.Z}+2]}
+	
+
+	/varcalc angle ${Target.Heading.DegreesCCW}+45
+	/echo prean:${angle}
+	/if (${angle} > 360) /varcalc angle ${angle}-360
+	/if (${angle} < 0) /varset angle ${angle}+360
+	/echo angle:${angle}
+	/call WarpPointOnCircle ${Target.ID} ${angle} ${radius}
+}
+
+/return
+
+Sub GetCurrTargetAggroListPos
+
+/declare x int local
+/for x 1 to 13
+	/if (${Me.XTarget[${x}].ID} == ${Target.ID} ) /return ${x} 
+/next x
+
+/return 0
+
+
+Sub CheckDrogaBosses
+
+	/if ( ${SpawnCount[npc ${Mob${mo}} radius ${MaxRad} zradius ${MaxZ} targetable noalert 1 range ${AntiDrogaMobLevel} 300]}>0) {
+	|/echo Got Suspected AntiBot or Boss
+	/declare x int local
+	/declare oldTarg int ${npcID}
+	
+	/for x 1 to ${SpawnCount[npc ${Mob${mo}} radius ${MaxRad} zradius ${MaxZ} targetable  noalert 1 range ${AntiDrogaMobLevel} 300]}
+		 /if ( ${SpawnCount[npc ${Mob${mo}} radius ${MaxRad} zradius ${MaxZ} targetable noalert 1 range ${AntiDrogaMobLevel} 300]}>1) /vardata npcID NearestSpawn[${x},npc ${Mob${mo}} radius ${MaxRad} zradius ${MaxZ} targetable noalert 1 range ${AntiDrogaMobLevel} 300].ID
+		 /if ( ${Spawn[id ${npcID}].Surname.Equal[Boss]} && !${Spawn[id ${npcID}].NearestSpawn[pc radius ${pcRadiusAvoid} notid ${Me.ID}].ID}) {
+			/echo Found a Droga Boss! ${Spawn[id ${npcID}].CleanName}
+			
+			/return ${npcID}
+		 }
+		 
+		/if ( ${Spawn[id ${npcID}].Level} >= ${AntiDrogaMobLevel} && !${Spawn[id ${npcID}].Surname.Equal[Boss]}) {
+			/echo Found Droga AntiBot mob . ${Spawn[id ${npcID}].Name} . adding to counter
+			/varset AntiDrogaMobs ${Math.Calc[${AntiDrogaMobs}+1]}
+		}
+		 /if ( ${npcID} == 0) {
+			/varset npcID ${oldTarg}
+			/return 0
+		}
+		 /varset oldTarg ${npcID}
+	/next x
+	}
+
+	
+/return 0
+
+Sub AvoidDrogaAntiBot
+
+	/if ( ${SpawnCount[npc ${Mob${mo}} radius ${MaxRad} zradius ${MaxZ} targetable noalert 1 range ${AntiDrogaMobLevel} 300]}>0) {
+	
+	/declare x int local
+	/declare tempID int local
+	
+	/for x 1 to ${SpawnCount[npc ${Mob${mo}} radius ${MaxRad} zradius ${MaxZ} targetable  noalert 1 range ${AntiDrogaMobLevel} 300]}
+		 /vardata tempID NearestSpawn[${x},npc ${Mob${mo}} radius ${MaxRad} zradius ${MaxZ} targetable noalert 1 range ${AntiDrogaMobLevel} 300].ID
+				 
+		/if ( ${Spawn[id ${tempID}].Level} >= ${AntiDrogaMobLevel} && !${Spawn[id ${tempID}].Surname.Equal[Boss]}) {
+			/echo Found Droga AntiBot mob . ${Spawn[id ${tempID}].Name} . adding to counter
+			/varset AntiDrogaMobs ${Math.Calc[${AntiDrogaMobs}+1]}
+		}
+		
+		 	/next x
+	}
+
+/return
+
+
+
+Sub LeaveDrogaInstance
+		
+		:LDL
+		/if ( ${Zone.ID}==81) {
+			/nomodkey /itemnotify powersource rightmouseup
+			/delay 1s
+			/goto :LDL
+		}
+		
+		/delay 5m ${Zone.ID}!=81
+		/varset DrogaTimer 30m
+		/call ZoneCheck
+/return
