@@ -34,6 +34,13 @@ Sub main
 			}
 		
 		}
+
+		/if (${VendorName.Equal[Sanford]} && !${Window[GiveWnd].Child[GVW_MyMoney0].Text.Equal[10000]}) {
+			/call GrabCash 10000
+				
+			/nomodkey /notify GiveWnd GVW_MyMoney0 leftmouseup
+			/delay 10s !${Cursor.ID} && ${Window[GiveWnd].Child[GVW_MyMoney0].Text.Equal[10000]}
+		}
 	}
 }
 /doevents

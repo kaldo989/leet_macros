@@ -1276,6 +1276,7 @@ Sub dispell_with_ring
 	/if (${Me.Buff[Injected Poison I].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
 	/if (${Me.Buff[Breath of Ultor].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
 	/if (${Me.Buff[Malicious Decay].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
+	
 /return
 
 sub Event_TargetOoR
