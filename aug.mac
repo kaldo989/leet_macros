@@ -4,7 +4,7 @@
 #event Whisper "#1# whispers, 'The total cost to turn these items into an augment is #2# platinum pieces.'"
 Sub main
 
-/echo Starting Auto pp grabber :)
+/echo Starting Auto pp grabber :) V2
 /declare ItemName string outer
 /declare VendorName string outer
 /declare Price string outer
@@ -35,7 +35,8 @@ Sub main
 		
 		}
 
-		/if (${VendorName.Equal[Sanford]} && !${Window[GiveWnd].Child[GVW_MyMoney0].Text.Equal[10000]}) {
+		
+		/if (${Target.CleanName.Equal[Sanford]} && !${Window[GiveWnd].Child[GVW_MyMoney0].Text.Equal[10000]}) {
 			/call GrabCash 10000
 				
 			/nomodkey /notify GiveWnd GVW_MyMoney0 leftmouseup
