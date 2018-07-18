@@ -173,6 +173,8 @@ sub Main
 
  /if (${Defined[Param0]}) /varset DoLoot ${Param0}
 
+ /if (${DoLoot}==2) /echo Looting nameds only!
+ 
  /if (${Defined[Param1]}) /varset MaxRad ${Param1}
  /declare parmLoop int local
  |/if (${Defined[Param2]}) /varset Mob1 ${Param2}

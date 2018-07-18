@@ -219,7 +219,12 @@ Sub LootMobs
 
  }
 
- /declare DeadCount int local ${SpawnCount[corpse radius ${CorpseRadius} noalert 25 range 1# 300# ]}
+/if (${DoLoot}==1) {
+ 	/declare DeadCount int local ${SpawnCount[corpse radius ${CorpseRadius} noalert 25 range 1# 300# ]}
+ } else {
+
+	/declare DeadCount int local ${SpawnCount[corpse radius ${CorpseRadius} # noalert 25 range 1# 300# ]}
+ }
  /call CheckXTargetAggro
  /if (!${LootMobs} || ${Macro.Return}>0 || ${SpawnCount[npc radius ${MobsTooClose} range 1# 300# noalert ${AlertList} ]} || !${DeadCount} || ${Me.Combat} || (${Cursor.NoDrop} && !${Me.FreeInventory})) {
 
@@ -245,8 +250,11 @@ Sub LootMobs
 
  /for i 1 to ${DeadCount}
 
+/if (${DoLoot}==1) {
  /varset CorpseList ${CorpseList}${NearestSpawn[${i},corpse radius ${CorpseRadius} noalert 25 range 1# 300# ].ID}|
-
+} else {
+	/varset CorpseList ${CorpseList}${NearestSpawn[${i},corpse radius ${CorpseRadius} # noalert 25 range 1# 300# ].ID}|
+}
  /next i
 
  
