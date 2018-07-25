@@ -174,7 +174,7 @@ sub Main
  /if (${Defined[Param0]}) /varset DoLoot ${Param0}
 
  /if (${DoLoot}==2) /echo Looting nameds only!
- 
+
  /if (${Defined[Param1]}) /varset MaxRad ${Param1}
  /declare parmLoop int local
  |/if (${Defined[Param2]}) /varset Mob1 ${Param2}
@@ -727,7 +727,8 @@ Sub Combat
 	
  }
  
- /if ( ${FindItem[Frosted Cuirass of Enlightenment].ID}>0 && ${Me.Song[Circle of Power III].Duration}<=3 && ${Cast.Ready}) {
+ /if ( ${FindItem[Frosted Cuirass of Enlightenment].ID}>0 && ${Me.Song[Circle of Power III].Duration}<=3 && ${Me.Inventory[chest].Name.Equal[Frosted Cuirass of Enlightenment]}&& ${Cast.Ready}) {
+	 
 	/itemnotify chest rightmouseup
  }
  /call dispell_with_ring
