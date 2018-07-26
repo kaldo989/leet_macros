@@ -212,8 +212,8 @@ Sub BuffCheck
 
  /delay 1s
 
- /Potionbelt activate 3
-
+ |/Potionbelt activate 3
+/itemnotify ${FindItem[=Bottle of Adventure III].InvSlot} rightmouseup
  /delay 10s ${Me.Buff["Bottle of Adventure III"].Duration.TotalSeconds}>120
 
  /delay 1s
@@ -228,7 +228,8 @@ Sub BuffCheck
 
  /delay 1s
 
- /Potionbelt activate 4
+ |/Potionbelt activate 4
+/itemnotify ${FindItem[=Elixir of Speed X].InvSlot} rightmouseup
 
  /delay 5s ${Me.Buff["Elixir of Speed X"].Duration.TotalSeconds}>120
 
@@ -242,8 +243,8 @@ Sub BuffCheck
 
  /delay 5
 
- /casting "Ring of Dain Frostreaver IV" -item
-
+ |/casting "Ring of Dain Frostreaver IV" -item
+/itemnotify ${FindItem[=Ring of Dain Frostreaver IV].InvSlot} rightmouseup
  /delay 2s
 
  }
@@ -254,8 +255,8 @@ Sub BuffCheck
 
  /delay 5
 
- /itemnotify rightfinger rightmouseup
-
+ |/itemnotify rightfinger rightmouseup
+ /itemnotify ${FindItem[=Stormeye Band].InvSlot} rightmouseup
  /delay 2s
 
  }
@@ -264,8 +265,8 @@ Sub BuffCheck
 
 /if (${Me.Buff["Sacred Striking Courage of Brell"].Duration.TotalSeconds}<300 && ${Spell["Sacred Striking Courage of Brell"].Stacks} && ${FindItemCount[=Bloody Mantle of Agony]}) {	
 
- /itemnotify shoulder rightmouseup
-
+ |/itemnotify shoulder rightmouseup
+/itemnotify ${FindItem[=Bloody Mantle of Agony].InvSlot} rightmouseup
  /delay 1s
 
  }
@@ -278,8 +279,8 @@ Sub BuffCheck
 
  /delay 5
 
- /casting "Ring of Slaughtering Cures" -item
-
+ |/casting "Ring of Slaughtering Cures" -item
+/itemnotify ${FindItem[=Ring of Slaughtering Cures].InvSlot} rightmouseup
  /delay 3s
 
  }
@@ -290,8 +291,8 @@ Sub BuffCheck
 
  /delay 5
 
- /casting "Golden Dragonlinked Chestguard" - item	
-
+ |/casting "Golden Dragonlinked Chestguard" - item	
+/itemnotify ${FindItem[=Golden Dragonlinked Chestguard].InvSlot} rightmouseup
  /varset ChestTimer 1s
 
  /delay 3s ${Me.Song[Circle of Power III].ID}
