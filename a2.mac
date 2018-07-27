@@ -692,7 +692,7 @@ Sub Combat
  /if (!${Me.Buff[Bladestorm Attunement].ID} && ${FindItemCount[=Perspicuous Coat of the Swift]} && !${ChestTimer} && ${DoBlades}) {
 
  |/itemnotify chest rightmouseup
- 	
+ 
 /itemnotify ${FindItem[Perspicuous Coat of the Swift].InvSlot} rightmouseup
 
  /varset ChestTimer 1s
@@ -708,7 +708,7 @@ Sub Combat
  /if (!${EpicTimer} && ${Cast.Ready[Warwolf`s Cry of Torment]}) {
 
  /delay 5
-
+	
  /itemnotify mainhand rightmouseup
 
  /varset EpicTimer 100s
@@ -717,9 +717,10 @@ Sub Combat
 
  }
 
- /if (!${HealHot} && !${Me.Song[Elixir of Healing XVII].Duration} && ${Cast.Ready} ) {
+ /if (!${HealHot} && !${Me.Song[Elixir of Healing XVII].Duration} && ${FindItemCount[Elixir of Healing XVII]}>0&& ${Cast.Ready} ) {
 	
 	|/potionbelt activate 1
+	
 	/itemnotify ${FindItem[Elixir of Healing XVII].InvSlot} rightmouseup
 	/varset HealHot 5
  }
@@ -741,6 +742,7 @@ Sub Combat
 	 
 	|/itemnotify chest rightmouseup
 	/itemnotify ${FindItem[Supple White Tunic].InvSlot} rightmouseup
+	
  }
  /call dispell_with_ring
  /goto :have_target
