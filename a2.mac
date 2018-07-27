@@ -736,6 +736,12 @@ Sub Combat
 	|/itemnotify chest rightmouseup
 	/itemnotify ${FindItem[Frosted Cuirass of Enlightenment].InvSlot} rightmouseup
  }
+
+ /if ( ${FindItem[Supple White Tunic].ID}>0 && ${Me.Song[Circle of Power III].Duration}<=3 && ${Cast.Ready}) {
+	 
+	|/itemnotify chest rightmouseup
+	/itemnotify ${FindItem[Supple White Tunic].InvSlot} rightmouseup
+ }
  /call dispell_with_ring
  /goto :have_target
 
