@@ -1554,7 +1554,7 @@ Sub BloodyKithicor
 
 /delay 7
 /nomodkey /keypress home
-/face heading 55.20
+/face fast heading 55.20
 /delay 2
 /click left center
 /doortarget
@@ -1675,7 +1675,7 @@ Sub ZoneOC
 /nomodkey /keypress home
 /warp loc -39.78 68.08 7.15
 /delay 7
-/face heading 55.20
+/face fast heading 55.20
 /delay 2
 /click left center
 
@@ -1714,7 +1714,7 @@ Sub ZoneOC
 /delay 5
 
 |/face loc -38.34, -90.69 nolook
-/face heading 229.24
+/face fast heading 229.24
 /delay 3
 
 /keypress forward hold
