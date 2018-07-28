@@ -750,23 +750,43 @@ Sub Combat
 
  }
 
-/if (${Zone.ID}==403 && ${Target.Name.Left[2].Equal[##]} &&(!${EpicTimer} && ${Cast.Ready[Warwolf`s Cry of Torment]})) {
+/if (${Zone.ID}==403 && ${Target.Name.Left[2].Equal[##]}) {
+	/if (${Me.AltAbilityReady[Fundament: Second Spire of the Warlord]} && ${Me.Class.ShortName.Equal[WAR]} && ${Target.PctHPs}<95 && ${Target.Type.Equal[NPC]}) {
+		/delay 5
+		/alt activate 1401
+		/delay 5
+	}
 
- /delay 5
+	/if (${Me.CombatAbilityReady[Precision Discipline]} && !${Melee.DiscID} && ${Me.Class.ShortName.Equal[WAR]} && ${Target.PctHPs}<95 && ${Target.Type.Equal[NPC]}) {
+		/delay 5
+		/disc precision discipline
+		/delay 1s
+	}
 
- /itemnotify mainhand rightmouseup
+	/if (${Me.CombatAbilityReady[Punch Through]} && !${Melee.DiscID} && ${Me.Class.ShortName.Equal[WAR]} && ${Target.PctHPs}<95 && ${Target.Type.Equal[NPC]}) {
+		/delay 5
+		/disc punch through
+		/delay 1s
+	}
+	/if ((!${EpicTimer} && ${Cast.Ready[Warwolf`s Cry of Torment]})) {
 
- /delay 2
- 
- /casting "The Composer" - item
- 
- /delay 2
- 
- /varset EpicTimer 125s
+		/delay 5
 
- /delay 3
+		/itemnotify mainhand rightmouseup
 
- }
+		/delay 2
+			
+		/casting "The Composer" - item
+			
+		/delay 2
+			
+		/varset EpicTimer 125s
+
+		/delay 3
+
+	}
+
+}
 
 /if (${Me.Class.ShortName.Equal[BRD]} && ${Me.Song[Spirit of Vesagran].Duration.TotalSeconds}<10 && ${FindItemCount[=Colada]} && !${EpicTimer})  {
 	/delay 5
@@ -895,7 +915,7 @@ Sub LootTime
 
  /if (${FindItemCount[Droga Armor Package]}) /call DrogaPackage
 
-/if (${FindItemCount[Bag of Gold Token]}) {
+/if (${FindItemCount[Bag of Gold Token]}) {-
 	/delay 3
 	/itemnotify ${FindItem[Bag of Gold Token].InvSlot} rightmouseup
 	/delay 3
