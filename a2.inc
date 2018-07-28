@@ -66,7 +66,8 @@ Sub AddAlerts
 /alert add 1 npc "The Mechamatic Guardian"
 /alert add 1 npc "The Golden Maiden"
 /alert add 1 npc "005"
-/alert add 2 pc Eclin
+/alert add 1 npc "Emissary Tinnvin"
+/alert add 2 pc ${Me.CleanName}
 
 
 |/alert add 55 pc radius 40
@@ -229,7 +230,7 @@ Sub BuffCheck
  /delay 1s
 
  |/Potionbelt activate 4
-/itemnotify ${FindItem[=Elixir of Speed X].InvSlot} rightmouseup
+/itemnotify ${FindItem[=Distillate of Alacrity X].InvSlot} rightmouseup
 
  /delay 5s ${Me.Buff["Elixir of Speed X"].Duration.TotalSeconds}>120
 
