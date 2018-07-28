@@ -595,7 +595,7 @@ Sub Combat
 
  }
  
- /if (${Zone.ID}==403 && ${Target.CleanName.Length}==0) /tar npc noalert 1 next
+ /if ((${Zone.ID}==403 ||${Zone.ID}==405 || ${Zone.ID}==406) && ${Target.CleanName.Length}==0) /tar npc noalert 1 next
  /if (${Target.CleanName.Equal[a steadfast servant]}) {
 	/target clear
  
@@ -738,7 +738,7 @@ Sub Combat
 
 
 
- /if (${Me.Class.ShortName.Equal[WAR]} && !${EpicTimer} && ${Cast.Ready[Warwolf`s Cry of Torment]} && !${Zone.ID}==403) {
+ /if (${Me.Class.ShortName.Equal[WAR]} && !${EpicTimer} && ${Cast.Ready[Warwolf`s Cry of Torment]} && !${Zone.ID}==403 && !${Zone.ID}==405 && ${Zone.ID}==406) {
 
 	/delay 5
 
@@ -750,7 +750,7 @@ Sub Combat
 
  }
 
-/if (${Zone.ID}==403 && ${Target.Name.Left[2].Equal[##]}) {
+/if ((${Zone.ID}==403 ||${Zone.ID}==405 || ${Zone.ID}==406) && ${Target.Name.Left[2].Equal[##]}) {
 	/if (${Me.AltAbilityReady[Fundament: Second Spire of the Warlord]} && ${Me.Class.ShortName.Equal[WAR]} && ${Target.PctHPs}<95 && ${Target.Type.Equal[NPC]}) {
 		/delay 5
 		/alt activate 1401
