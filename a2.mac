@@ -749,6 +749,12 @@ Sub Combat
 	/delay 2
 
  }
+/if (${Me.Class.ShortName.Equal[MNK]} && !${EpicTimer} && ${Cast.Ready[The Sepukku]}) {
+	/delay 2
+	/itemnotify ${FindItem[The Sepukku].InvSlot} rightmouseup
+	/delay 5
+	/varset EpicTimer 30s
+}
 
 /if ((${Zone.ID}==403 ||${Zone.ID}==405 || ${Zone.ID}==406) && ${Target.Name.Left[2].Equal[##]}) {
 	/if (${Me.AltAbilityReady[Fundament: Second Spire of the Warlord]} && ${Me.Class.ShortName.Equal[WAR]} && ${Target.PctHPs}<95 && ${Target.Type.Equal[NPC]}) {
