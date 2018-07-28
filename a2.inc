@@ -263,7 +263,7 @@ Sub BuffCheck
 
 
 
-/if (${Me.Buff["Sacred Striking Courage of Brell"].Duration.TotalSeconds}<300 && ${Spell["Sacred Striking Courage of Brell"].Stacks} && ${FindItemCount[=Bloody Mantle of Agony]}) {	
+/if (${FindItemCount[=Bloody Mantle of Agony]} && ${Me.Buff["Sacred Striking Courage of Brell"].Duration.TotalSeconds}<300 && ${Spell["Sacred Striking Courage of Brell"].Stacks}) {	
 
  |/itemnotify shoulder rightmouseup
 /itemnotify ${FindItem[=Bloody Mantle of Agony].InvSlot} rightmouseup
@@ -271,9 +271,21 @@ Sub BuffCheck
 
  }
 
- 
+ /if (${FindItemCount[=Ring of the Dreamslayer]} && ${Me.Buff["Ancestral Memories III"].Duration.TotalSeconds}<300 && ${Spell["Ancestral Memories III"].Stacks}) {	
 
+ |/itemnotify shoulder rightmouseup
+/itemnotify ${FindItem[=Ring of the Dreamslayer].InvSlot} rightmouseup
+ /delay 1s
 
+ }
+
+/if (${FindItemCount[=Earring of Reverie]} && ${Me.Buff["Might of Stone VI"].Duration.TotalSeconds}<300 && ${Spell["Might of Stone VI"].Stacks}) {	
+
+ |/itemnotify shoulder rightmouseup
+/itemnotify ${FindItem[=Earring of Reverie].InvSlot} rightmouseup
+ /delay 1s
+
+ }
 
 /if ((${Me.Buff[Insidious Malady].ID} || ${Me.Buff[Howl of Tashan].ID} || ${Me.Buff[Plague of Hulcror].ID}) && ${FindItemCount[=Ring of Slaughtering Cures]} && ${Cast.Ready[Ring of Slaughtering Cures]}) {
 
@@ -1496,7 +1508,7 @@ Sub ZoneSAD
 
 /varset sadcount 0
 
-
+/mac a2 900000 soi dein win
 
 /return
 

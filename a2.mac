@@ -165,7 +165,7 @@ sub Main
 
  /declare DoLoot int outer 1
 
-
+/declare DoBardEpicBuff int outer 1
 
 |Can define the parameters here, will override anything declared|
 
@@ -261,6 +261,7 @@ sub Main
 	/notify InventoryWindow IW_Subwindows tabselect 5
 	/delay 3s ${Window[InventoryWindow].Child[AltCurr_PointList].Items}
 	/notify InventoryWindow IW_Subwindows tabselect 1
+	/windowstate InventoryWindow
 }
 :startpoint
 
@@ -594,6 +595,7 @@ Sub Combat
 
  }
  
+ /if (${Zone.ID}==403 && ${Target.CleanName.Length}==0) /tar npc noalert 1 next
  /if (${Target.CleanName.Equal[a steadfast servant]}) {
 	/target clear
  
@@ -736,17 +738,47 @@ Sub Combat
 
 
 
- /if (!${EpicTimer} && ${Cast.Ready[Warwolf`s Cry of Torment]}) {
+ /if (${Me.Class.ShortName.Equal[WAR]} && !${EpicTimer} && ${Cast.Ready[Warwolf`s Cry of Torment]} && !${Zone.ID}==403) {
 
- /delay 5
-	
- /itemnotify mainhand rightmouseup
+	/delay 5
 
- /varset EpicTimer 100s
+	/itemnotify mainhand rightmouseup
 
- /delay 5
+	/varset EpicTimer 80s
+
+	/delay 2
 
  }
+
+/if (${Zone.ID}==403 && ${Target.Name.Left[2].Equal[##]} &&(!${EpicTimer} && ${Cast.Ready[Warwolf`s Cry of Torment]})) {
+
+ /delay 5
+
+ /itemnotify mainhand rightmouseup
+
+ /delay 2
+ 
+ /casting "The Composer" - item
+ 
+ /delay 2
+ 
+ /varset EpicTimer 125s
+
+ /delay 3
+
+ }
+
+/if (${Me.Class.ShortName.Equal[BRD]} && ${Me.Song[Spirit of Vesagran].Duration.TotalSeconds}<10 && ${FindItemCount[=Colada]} && !${EpicTimer})  {
+	/delay 5
+
+	/itemnotify mainhand rightmouseup
+
+	/varset EpicTimer 50s
+
+	/delay 2
+
+ }	
+
 
  /if (${FindItemCount[Distillate of Celestial Healing XVI]}>0 && !${HealHot} &&  !${Me.Song[Elixir of Healing XVII].Duration} && ${Cast.Ready} ) {
 	
@@ -767,6 +799,12 @@ Sub Combat
 	 
 	|/itemnotify chest rightmouseup
 	/itemnotify ${FindItem[Frosted Cuirass of Enlightenment].InvSlot} rightmouseup
+ }
+
+/if ( ${FindItemCount[Golden Dragonlinked Chestguard]}>0 && ${Me.Song[Circle of Power III].Duration}<=3 && ${Cast.Ready}) {
+	 
+	|/itemnotify chest rightmouseup
+	/itemnotify ${FindItem[Golden Dragonlinked Chestguard].InvSlot} rightmouseup
  }
 
  /if ( ${FindItemCount[Supple White Tunic]}>0 && ${Me.Song[Circle of Power III].Duration}<=3 && ${Cast.Ready}) {
@@ -798,14 +836,33 @@ Sub Combat
 
  }
 
-
-
+/if (${Cursor.ID}==150001 && !${Me.Name.Equal[Eclin]}) {
+	/echo Epic 5 Collection bag!
+	/bcaa //popup ${Me.CleanName} has a Epic 5 Collection bag on the cursor and no free inventory! Ending macro at safespot!
+	/stick off
+	/melee off
+	/stick off
+	/warp s
+	/delay 1s
+	/endm
+ } 
+ 
+ 
 /if (${DoLoot}) {
 
  /delay 3
  /call CheckXTarget
  
- /if (${Macro.Return} < 1 ) /call LootTime 
+ /if (${Macro.Return} < 1 ) {
+	/if (${Zone.ID}==403) {
+		/itemnotify charm rightmouseup
+		/delay 3
+		/itemnotify charm rightmouseup
+
+	}
+	 /call LootTime
+
+ } 
 
  }
 
@@ -838,7 +895,11 @@ Sub LootTime
 
  /if (${FindItemCount[Droga Armor Package]}) /call DrogaPackage
 
-
+/if (${FindItemCount[Bag of Gold Token]}) {
+	/delay 3
+	/itemnotify ${FindItem[Bag of Gold Token].InvSlot} rightmouseup
+	/delay 3
+}
 
 
 
@@ -924,6 +985,26 @@ Sub Zonecheck
 	
 	/return
  }
+/if (${ZoneIDStarted}==403) {
+ 
+	/echo Returning to SAD
+	/delay 30s
+	/mac goto sad
+ }
+ 
+/if (${ZoneIDStarted}==406) {
+ 
+	/echo Returning to SAD
+	/delay 30s
+	/mac goto sad
+ } 
+  
+/if (${ZoneIDStarted}==405) {
+ 
+	/echo Returning to SAD
+	/delay 30s
+	/mac goto sad
+ } 
 
  /attack off
 
@@ -1018,8 +1099,8 @@ Sub Warren
 
 
 
-
-/if (${SpawnCount[npc steadfast radius 50]}) /goto :sell
+|old 50
+/if (${SpawnCount[npc steadfast radius 10]}) /goto :sell
 
 /if (${SpawnCount[NPC merchant noalert 3]}) /goto :merchant2
 
@@ -1040,8 +1121,8 @@ Sub Warren
  /if (${Me.AltAbilityReady[Steadfast Servant]}) {
 
  /alt act 485
-
- /delay 20s ${SpawnCount[NPC Steadfast radius 50 noalert 3]}
+|old 50
+ /delay 20s ${SpawnCount[NPC Steadfast radius 10 noalert 3]}
 
  /goto :Merchant
 
@@ -1313,17 +1394,22 @@ Sub DPOld
 /return
 
 Sub dispell_with_ring
-	/if (${FindItemCount[Ring of Slaughtering Cures]} == 0 || ${FindItem[Ring of Slaughtering Cures].TimerReady}>0 ) /return
-	/if (${Me.Buff[Tashania].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
-	/if (${Me.Buff[Clamor of Tashan Rk. III].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
-	/if (${Me.Buff[Cacophony of Pain].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
-	/if (${Me.Buff[Searing Paper Cuts].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
-	/if (${Me.Song[Devastating Wound].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
-	/if (${Me.Buff[Blood of Saryrn].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
-	/if (${Me.Buff[Injected Poison I].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
-	/if (${Me.Buff[Breath of Ultor].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
-	/if (${Me.Buff[Malicious Decay].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
-	
+	/if (${FindItemCount[Legendary Rebirth Charm]}) {
+		/if (${FindItem[Legendary Rebirth Charm].TimerReady}>0) /return
+			/if (${Me.Buff[Tashania].Duration.Seconds}>0) /call cast "Legendary Rebirth Charm" item
+
+	} else {
+		/if (${FindItemCount[Ring of Slaughtering Cures]} == 0 || ${FindItem[Ring of Slaughtering Cures].TimerReady}>0 ) /return
+		/if (${Me.Buff[Tashania].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
+		/if (${Me.Buff[Clamor of Tashan Rk. III].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
+		/if (${Me.Buff[Cacophony of Pain].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
+		/if (${Me.Buff[Searing Paper Cuts].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
+		/if (${Me.Song[Devastating Wound].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
+		/if (${Me.Buff[Blood of Saryrn].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
+		/if (${Me.Buff[Injected Poison I].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
+		/if (${Me.Buff[Breath of Ultor].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
+		/if (${Me.Buff[Malicious Decay].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
+	}
 /return
 
 sub Event_TargetOoR
