@@ -24,7 +24,7 @@ sub Main
  /call SetupAdvLootVars
 
  /call AddAlerts
-/echo test a2
+/echo a2
  |Pet heal
  
  /declare PetHealPct int outer 0    | set to 0 to disable pet heals
@@ -50,8 +50,9 @@ sub Main
  /declare DrogaInstanceTier int outer 0
  /declare DrogaInstanceLinks[10] string outer 
  /declare DrogaTimer timer outer
- 
- 
+ /declare IsLdon int outer 0
+ /call CheckLdon
+ /if (${IsLdon}) /echo In LDON!
  /declare ReclaimInvOpenOnce int outer 0
 |How many levels below or above you want to kill|
 
@@ -371,7 +372,9 @@ sub Main
 
 /varset TargMax ${Math.Calc[${Me.Level}+${MaxLVL}]}
 
-
+/if (${IsLdon}) {
+	/if (${SpawnCount[of Eight]} > 0) /beep
+}
 
 /for mo 1 to ${MobCount}
 
@@ -514,9 +517,10 @@ sub Main
 
 
 /stand
-/if (${Zone.Name.Find[:]} ) {
-	/echo test
+/if (${IsLdon} ) {
+	
 	/if (${SpawnCount[object box]}>0 || ${SpawnCount[object barrel]}>0) {
+		/echo Killing object no mobs up!
 		/call KillObject
 		/goto :Waiting
 	}
@@ -1449,4 +1453,9 @@ Sub LeaveDrogaInstance
 		/delay 5m ${Zone.ID}!=81
 		/varset DrogaTimer 30m
 		/call ZoneCheck
+/return
+
+Sub CheckLdon
+/declare ldonZones string local guka,ruja,taka,mira,mmca,gukb,rujb,takb,mirb,mmcb,gukc,rujc,takc,mirc,mmcc,gukd,rujd,takd,mird,mmcd,guke,ruje,take,mire,mmce,gukf,rujf,takf,mirf,mmcf,gukg,rujg,takg,mirg,mmcg,gukh,rujh,takh,mirh,mmch,ruji,taki,miri,mmci,rujj,takj,mirj,mmcj
+/if (${ldonZones.Find[${Zone.ShortName}]}) /varset IsLdon 1
 /return
