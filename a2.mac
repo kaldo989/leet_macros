@@ -746,28 +746,28 @@ Sub Combat
 
  }
 
- /if (!${HealHot} && !${Me.Song[Elixir of Healing XVII].Duration} && ${FindItemCount[Elixir of Healing XVII]}>0&& ${Cast.Ready} ) {
+ /if (!${HealHot} && !${Me.Song[Elixir of Healing XVII].Duration} && ${FindItemCount[Distillate of Celestial Healing XVI]}>0&& ${Cast.Ready} ) {
 	
 	|/potionbelt activate 1
 	
-	/itemnotify ${FindItem[Elixir of Healing XVII].InvSlot} rightmouseup
+	/itemnotify ${FindItem[Distillate of Celestial Healing XVI].InvSlot} rightmouseup
 	/varset HealHot 5
  }
  
- /if (${FindItemCount[Divine Healing XV]}>0 &&  ${FindItem[Divine Healing XV].TimerReady} == 0 && ${Me.PctHPs} <= 95 && ${Cast.Ready}) {
+ /if (${FindItemCount[Distillate of Divine Healing XV]}>0 &&  ${FindItem[Distillate of Divine Healing XV].TimerReady} == 0 && ${Me.PctHPs} <= 65 && ${Cast.Ready}) {
 	
 	|/potionbelt activate 2
-	/itemnotify ${FindItem[Divine Healing XV].InvSlot} rightmouseup
+	/itemnotify ${FindItem[Distillate of Divine Healing XV].InvSlot} rightmouseup
 	
  }
  
- /if ( ${FindItem[Frosted Cuirass of Enlightenment].ID}>0 && ${Me.Song[Circle of Power III].Duration}<=3 && ${Cast.Ready}) {
+ /if ( ${FindItemCount[Frosted Cuirass of Enlightenment]}>0 && ${Me.Song[Circle of Power III].Duration}<=3 && ${Cast.Ready}) {
 	 
 	|/itemnotify chest rightmouseup
 	/itemnotify ${FindItem[Frosted Cuirass of Enlightenment].InvSlot} rightmouseup
  }
 
- /if ( ${FindItem[Supple White Tunic].ID}>0 && ${Me.Song[Circle of Power III].Duration}<=3 && ${Cast.Ready}) {
+ /if ( ${FindItemCount[Supple White Tunic]}>0 && ${Me.Song[Circle of Power III].Duration}<=3 && ${Cast.Ready}) {
 	 
 	|/itemnotify chest rightmouseup
 	/itemnotify ${FindItem[Supple White Tunic].InvSlot} rightmouseup
