@@ -14,20 +14,17 @@
 #define hailIt 1
 |#of inventory slots free to trigger a sell
 #define FreeInventorySlots 7
-|1297 276 4
 
-|droga T1 88 88 49 # 104
-|droga T1 88 88 0 90 90 58 # 106
-
+|CombatArc is used to calculate arc to keep mobs in. Value is doubled ex. 45 results in a 90deg arc
+#define CombatArc 45
 
 
-/return
 sub Main
 /echo PotionBelt order HoT,DH,Exp potion
  /call SetupAdvLootVars
 
  /call AddAlerts
-/echo test auto
+/echo test a2
  |Pet heal
  
  /declare PetHealPct int outer 0    | set to 0 to disable pet heals
@@ -41,7 +38,7 @@ sub Main
  /declare pcRadiusAvoid int outer 30
 
 
-|Alerts are defined in the Auto.Inc. Will not kill mobs on alert list 1, have to go to the auto.inc to add alerts. Alerts are cleared when logging.|
+|Alerts are defined in the A2.Inc. Will not kill mobs on alert list 1, have to go to the auto.inc to add alerts. Alerts are cleared when logging.|
 
 
 
@@ -444,6 +441,8 @@ sub Main
 
 :KillMob
 
+
+
 /if (${npcID}==0) /goto :startpoint
 
 /echo KillMob ${Spawn[id ${npcID}].CleanName} id:${npcID}
@@ -515,8 +514,17 @@ sub Main
 
 
 /stand
-
+/if (${Zone.Name.Find[:]} ) {
+	/echo test
+	/if (${SpawnCount[object box]}>0 || ${SpawnCount[object barrel]}>0) {
+		/call KillObject
+		/goto :Waiting
+	}
+}
 /delay 10s ${Target.ID}
+
+
+
 
 /goto :Waiting
 
@@ -524,7 +532,24 @@ sub Main
 
 /return
 
+Sub KillObject
+/declare tarID int local
+/if (${SpawnCount[object box]} && ${SpawnCount[object barrel]}) {
+ /varset tarID ${If[${Math.Rand[2]},${Spawn[object box].ID},${Spawn[object barrel].ID}]}
+} else {
+	/if (${SpawnCount[object box]}) /varset tarID ${Spawn[object box].ID}
+	/if (${SpawnCount[object barrel]}) /varset tarID ${Spawn[object barrel].ID}
+}
 
+/if (${tarID} && ${Spawn[${tarID}].Type.Equal[object]}) {
+	/warp loc ${Spawn[${tarID}].Y} ${Spawn[${tarID}].X} ${Spawn[${tarID}].Z}
+	/delay 5
+	/target id ${tarID}
+	/delay 5
+	/open
+	/delay 5
+}
+/return
 
 Sub Combat
 
