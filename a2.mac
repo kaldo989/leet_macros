@@ -749,11 +749,11 @@ Sub Combat
 	/delay 2
 
  }
-/if (${Me.Class.ShortName.Equal[MNK]} && !${EpicTimer} && ${Cast.Ready[The Sepukku]}) {
+/if (${Me.Class.ShortName.Equal[MNK]} && !${EpicTimer} && ${Cast.Ready[The  Sepukku]}) {
 	/delay 2
-	/itemnotify ${FindItem[The Sepukku].InvSlot} rightmouseup
+	/itemnotify ${FindItem[The  Sepukku].InvSlot} rightmouseup
 	/delay 5
-	/varset EpicTimer 30s
+	/varset EpicTimer 90s
 }
 
 /if ((${Zone.ID}==403 ||${Zone.ID}==405 || ${Zone.ID}==406) && ${Target.Name.Left[2].Equal[##]}) {
