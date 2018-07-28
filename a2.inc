@@ -1560,11 +1560,11 @@ Sub BloodyKithicor
 /doortarget
 
 /delay 5
-
+/click left center
 /face door nolook
 
 /delay 1s
-
+/click left center
 /keypress USE
 
 
@@ -1682,11 +1682,11 @@ Sub ZoneOC
 /doortarget
 
 /delay 5
-
+/click left center
 |/face door nolook
 
 /delay 1s
-
+/click left center
 /keypress USE
 
 
