@@ -20,7 +20,9 @@
 
 
 sub Main
-/echo PotionBelt order HoT,DH,Exp potion
+
+
+/if (!${Plugin[mq2cast].Name.Length}) /plugin mq2cast
  /call SetupAdvLootVars
 
  /call AddAlerts
@@ -746,7 +748,7 @@ Sub Combat
 
  }
 
- /if (!${HealHot} && !${Me.Song[Elixir of Healing XVII].Duration} && ${FindItemCount[Distillate of Celestial Healing XVI]}>0&& ${Cast.Ready} ) {
+ /if (${FindItemCount[Distillate of Celestial Healing XVI]}>0 && !${HealHot} &&  !${Me.Song[Elixir of Healing XVII].Duration} && ${Cast.Ready} ) {
 	
 	|/potionbelt activate 1
 	
