@@ -1549,11 +1549,14 @@ Sub BloodyKithicor
 :Potime
 
 /delay 5s
-
+/nomodkey /keypress home
 /warp loc -39.78 68.08 7.15
 
+/delay 7
+/nomodkey /keypress home
+/face heading 55.20
 /delay 2
-
+/click left center
 /doortarget
 
 /delay 5
@@ -1669,16 +1672,18 @@ Sub ZoneOC
 :Potime
 
 /delay 5s
-
+/nomodkey /keypress home
 /warp loc -39.78 68.08 7.15
-
+/delay 7
+/face heading 55.20
 /delay 2
+/click left center
 
 /doortarget
 
 /delay 5
 
-/face door nolook
+|/face door nolook
 
 /delay 1s
 
@@ -1708,9 +1713,9 @@ Sub ZoneOC
 
 /delay 5
 
-/face loc -38.34, -90.69 nolook
-
-/delay 2s
+|/face loc -38.34, -90.69 nolook
+/face heading 229.24
+/delay 3
 
 /keypress forward hold
 
@@ -1756,9 +1761,9 @@ Sub ZoneOC
 
 /delay 5
 
-/face loc 855.07, -3098 nolook
-
-/delay 2s
+|/face loc 855.07, -3098 nolook
+/face heading 270
+/delay 5
 
 /keypress forward hold
 
