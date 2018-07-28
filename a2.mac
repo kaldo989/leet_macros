@@ -751,7 +751,8 @@ Sub Combat
  }
 /if (${Me.Class.ShortName.Equal[MNK]} && !${EpicTimer} && ${Cast.Ready[The  Sepukku]}) {
 	/delay 2
-	/itemnotify ${FindItem[The  Sepukku].InvSlot} rightmouseup
+	|/itemnotify ${FindItem[The  Sepukku].InvSlot} rightmouseup
+	/itemnotify mainhand rightmouseup
 	/delay 5
 	/varset EpicTimer 90s
 }
