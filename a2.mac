@@ -64,7 +64,7 @@ sub Main
  /if (${IsLdon}) {
 	 
 	 /echo In LDON!
-	 /declare LdonBoss string outer /first/second/third/fourth/fifth/sixth/seventh/eighth/ninth/tenth/eleventh/twelfth/thirteenth/fourteenth/fifteenth/
+	 /declare LdonBoss string outer 
  }
  /declare ReclaimInvOpenOnce int outer 0
 |How many levels below or above you want to kill|
@@ -402,7 +402,7 @@ sub Main
  /echo ${mo}
  /echo Waiting on spawns, level range ${TargMin} to ${TargMax}.
  /if (!${WaitingOnRespawn} && (${Zone.ID}==81 || ${Zone.ID}==90)) {
-	 /varset 3m
+	 /varset WaitingOnRespawn 3m
 	 /echo Set Respawn Timer to 3min.
  }
  /varset FadeCount 0
