@@ -181,7 +181,7 @@ Sub Event_EEALCantLoot(Line)
 /if (${Line.Find[may not loot this corpse]}) {
 	/varset CorpseTries ${Math.Calc[${CorpseTries}+1]}
 	/echo Corpsetry ${CorpseTries}
-	/if (${CorpseTries}>5) {
+	/if (${CorpseTries}>9) {
 		
 		 /varset ALDontLoot ${Target.ID}
 		 
@@ -397,7 +397,7 @@ Sub LootCorpse
  /delay 4 ${Window[LootWnd].Open}
  /doevents ALCantLoot
  
- /if (${CorpseTries}>5) {
+ /if (${CorpseTries}>9) {
  	/squelch /alert add 25 id ${ALDontLoot}
 	 /echo Failed to loot 5 times ignoring...
 	/return
