@@ -1,4 +1,6 @@
 
+|timer since last melee hit..
+#define MeleeTimeOutDuration 45s
 
 #include Ninjadvloota2.inc
 
@@ -8,8 +10,11 @@
 
 #event TargetOoR "#*#Your target is too far away, get closer!#*#"
 #event TargetOoR "#*#You cannot see your target.#*#"
+#event MobDeath "#*#You have slain #1#!"
+#Event GotHit   "#1#YOU for#*#points of damage."
+#Event GotHit   "#1# tries to #*# YOU, but #*#" 
 
-
+#event Hit "#*#YOU #*# for #*# points of damage."
 |Hail after warp. Helps with resyncing after warp
 #define hailIt 1
 |#of inventory slots free to trigger a sell
@@ -36,7 +41,7 @@ sub Main
 
 
 
- /declare KillTime int outer 60
+ 
  /declare pcRadiusAvoid int outer 30
 
 
@@ -53,8 +58,14 @@ sub Main
  /declare DrogaInstanceLinks[10] string outer 
  /declare DrogaTimer timer outer
  /declare IsLdon int outer 0
+ /declare WaitingOnRespawn timer outer 0
+ /declare MeleeHitLastTimer timer outer 0
  /call CheckLdon
- /if (${IsLdon}) /echo In LDON!
+ /if (${IsLdon}) {
+	 
+	 /echo In LDON!
+	 /declare LdonBoss string outer /first/second/third/fourth/fifth/sixth/seventh/eighth/ninth/tenth/eleventh/twelfth/thirteenth/fourteenth/fifteenth/
+ }
  /declare ReclaimInvOpenOnce int outer 0
 |How many levels below or above you want to kill|
 
@@ -139,7 +150,7 @@ sub Main
 
  /declare SpawnTimer timer outer
 
- /declare KillTimer timer outer
+ 
 
  /declare RageTimer timer outer
 
@@ -379,9 +390,6 @@ sub Main
 
 /varset TargMax ${Math.Calc[${Me.Level}+${MaxLVL}]}
 
-/if (${IsLdon}) {
-	/if (${SpawnCount[of Eight]} > 0) /beep
-}
 
 /for mo 1 to ${MobCount}
 
@@ -393,7 +401,10 @@ sub Main
 
  /echo ${mo}
  /echo Waiting on spawns, level range ${TargMin} to ${TargMax}.
-
+ /if (!${WaitingOnRespawn} && (${Zone.ID}==81 || ${Zone.ID}==90)) {
+	 /varset 3m
+	 /echo Set Respawn Timer to 3min.
+ }
  /varset FadeCount 0
 
  /warp succor
@@ -534,7 +545,11 @@ sub Main
 }
 /delay 10s ${Target.ID}
 
-
+/if ((${Zone.ID}==81 || ${Zone.ID}==90) && !${WaitingOnRespawn}) {
+	/echo No Respawn in 3m! Resetting zone...
+	/itemnotify powersource rightmouseup
+	/delay 3s
+}
 
 
 /goto :Waiting
@@ -564,11 +579,11 @@ Sub KillObject
 
 Sub Combat
 
- 
+ /varset MeleeHitLastTimer MeleeTimeOutDuration
  :kill_outer
 
- /varset KillTimer ${KillTime}s
 
+ 
  /call Zonecheck
 
  /doevents
@@ -613,10 +628,15 @@ Sub Combat
  }
 
 
-/if ( ${DoLoot}==2 && (${Target.Named} || ${Target.Name.Left[1].Equal[#]}) ) {
-	
-	/call CheckNamedList
+/if ( ${DoLoot}==2  ) {
+	/if  (${Target.Named} || ${Target.Name.Left[1].Equal[#]}) /call CheckNamedList
+	/if (${IsLdon} && ${LdonBoss.Find[/${Target.CleanName.Arg[1, ]}/]}) {
+		/call CheckNamedList
+	}
 }
+
+
+
 
  /if (!${Me.Standing}) /stand
 
@@ -632,7 +652,7 @@ Sub Combat
 
  }
 
-
+/if (${WaitingOnRespawn}>0) /varset WaitingOnRespawn 0
 
  /if (${Target.ID} && ${Target.Distance}<76 && !${Me.Combat} && !${Melee.Enrage} && ${Melee.Status.NotEqual[ESCAPING]}) {
 
@@ -685,17 +705,7 @@ Sub Combat
 	/varset spamTimer 1s
 } 
 
- /if (!${KillTimer} && ${Target.ID} && ${Target.PctHPs}>95) {
-
- /varset npcID ${Target.ID}	
-
- /if (${npcID}) /alert add 1 ID ${npcID}
-
- /delay 2
-
- /squelch /tar clear
-
- }
+ 
  
 
 
@@ -823,12 +833,18 @@ Sub Combat
 	/call ClickItem "Supple White Tunic"
 	
  }
+
+ 
  /call dispell_with_ring
  /goto :have_target
 
  }
 
-
+/if (!${MeleeHitLastTimer}) {
+	 /echo Melee timed out with no hits after MeleeTimeOutDuration! Ignoring mob...
+	 /alert add 1 ID ${Target.ID}
+	 /target clear
+ }
 
  /if (${SpawnCount[npc radius ${MaxRad2} zradius ${MaxZ2} targetable noalert 1 range ${TargMin} ${TargMax}]}) {
 
@@ -905,7 +921,7 @@ Sub LootTime
 
  /if (${FindItemCount[Droga Armor Package]}) /call DrogaPackage
 
-/if (${FindItemCount[Bag of Gold Token]}) {-
+/if (${FindItemCount[Bag of Gold Token]}>0) {
 	/delay 3
 	|/itemnotify ${FindItem[Bag of Gold Token].InvSlot} rightmouseup
 	/call ClickItem "Bag of Gold Token"
@@ -975,7 +991,7 @@ Sub Zonecheck
 	/delay 2s
 	/warp wp safe
 	/varcalc DeathCounter ${Math.Calc[${DeathCounter}+1]}
-	/timed 30s /macro a2 1 2000 named
+	/timed 30s /macro a2 ${DoLoot} ${MaxRad} named
 	|/goto :startpoint
  }
  
@@ -1423,6 +1439,21 @@ Sub dispell_with_ring
 	}
 /return
 
+sub Event_GotHit(Line,mobName)
+	|/echo HitMiss:${mobName}
+	/if (${Target.CleanName.Equal[${mobName}]}) /varset MeleeHitLastTimer MeleeTimeOutDuration
+/return
+
+
+sub Event_Hit
+	|/echo Hit timer ${MeleeHitLastTimer}
+	/varset MeleeHitLastTimer MeleeTimeOutDuration
+/return
+
+sub Event_MobDeath(Line,mobName)
+	
+	/echo Mob:${mobName}
+/return
 sub Event_TargetOoR
 |/echo event Target called!
 /declare radius int 10 local

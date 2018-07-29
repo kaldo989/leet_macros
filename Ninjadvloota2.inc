@@ -52,7 +52,7 @@
 
 #define RetryCorpse 5
 
-|#Event ALCantLoot "#*#may not loot this corpse#*#"
+#Event ALCantLoot "#*#may not loot this corpse#*#"
 
 #Event ALCantLoot "Someone is already looting that corpse."
 
@@ -399,6 +399,7 @@ Sub LootCorpse
  
  /if (${CorpseTries}>5) {
  	/squelch /alert add 25 id ${ALDontLoot}
+	 /echo Failed to loot 5 times ignoring...
 	/return
  }
  /if (${Target.ID}==${ALDontLoot} && ${Spawn[${ALDontLoot}].ID}) {
