@@ -25,7 +25,8 @@
 
 
 sub Main
-
+/declare lx int outer 
+/if (${Ini[a2.ini,a2].Length}==0) /call CreateIni
 
 /if (!${Plugin[mq2cast].Name.Length}) /plugin mq2cast
  /call SetupAdvLootVars
@@ -47,7 +48,7 @@ sub Main
 
 |Alerts are defined in the A2.Inc. Will not kill mobs on alert list 1, have to go to the auto.inc to add alerts. Alerts are cleared when logging.|
 
-/declare lx int outer 
+
 
  /declare KillZone int outer ${Zone.ID}
 
@@ -64,7 +65,7 @@ sub Main
  /if (${IsLdon}) {
 	 
 	 /echo In LDON!
-	 /declare LdonBoss string outer 
+	 /declare LdonBoss string outer ${Ini[a2.ini,Ldons,Bosses]}
  }
  /declare ReclaimInvOpenOnce int outer 0
 |How many levels below or above you want to kill|

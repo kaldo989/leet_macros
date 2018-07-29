@@ -6,6 +6,63 @@
 
 #event DrogaZI "Caridwi whispers, #*#"
 
+Sub CreateIni
+/ini a2.ini a2 Version 1
+/call WriteAlert "npc steadfast servant"
+/call WriteAlert "npc race teleport man"
+/call WriteAlert "npc race invisible man"
+/call WriteAlert "npc furious sentry"
+/call WriteAlert "npc Tatsujiro the Serene"
+/call WriteAlert "npc chaotic jester"
+/call WriteAlert "npc The Butler"
+/call WriteAlert "npc Lord Brekt"
+/call WriteAlert "npc Norrath`s Keepers Guard"
+/call WriteAlert "npc Vulak"
+/call WriteAlert "npc Kerchak"
+/call WriteAlert "npc guardian spirit"
+/call WriteAlert "npc Caridwi"
+/call WriteAlert "npc festering ooze"
+/call WriteAlert "npc dusty barrel"
+/call WriteAlert "npc Jaques the Infected"
+/call WriteAlert "npc time bender"
+/call WriteAlert "npc pioneer vulu"
+/call WriteAlert "npc Jaelle Florica"
+/call WriteAlert "npc Scout Madu"
+/call WriteAlert "npc Blacktalon"
+/call WriteAlert "npc Fabled Antibotter"
+/call WriteAlert "npc jester of bristlebane"
+/call WriteAlert "npc killer wasp"
+/call WriteAlert "npc essence of fire"
+/call WriteAlert "npc a menacing tree spirit"
+/call WriteAlert "npc Jagged Blades"
+/call WriteAlert "npc Durgin Skell"
+/call WriteAlert "npc Trakanon"
+/call WriteAlert "npc a hatchling"
+/call WriteAlert "npc The Quiet Wanderer"
+/call WriteAlert "npc Moldmaster Gangii"
+/call WriteAlert "npc a hill giant"
+/call WriteAlert "npc Caridwa"
+/call WriteAlert "npc Warm Light"
+/call WriteAlert "npc Scount Madu"
+/call WriteAlert "npc Pioneer Vulu"
+/call WriteAlert "npc Jaelle Florica"
+/call WriteAlert "npc Guardian Krogone"
+/call WriteAlert "npc The Mechamatic Guardian"
+/call WriteAlert "npc The Golden Maiden"
+/call WriteAlert "npc 005"
+/call WriteAlert "npc Emissary Tinnvin"
+/ini a2.ini Ldons Bosses /first/second/third/fourth/fifth/sixth/seventh/eighth/ninth/tenth/eleventh/twelfth/thirteenth/fourteenth/fifteenth/
+/return
+
+Sub WriteAlert(inString)
+	/declare x1 int local
+	/for x1 1 to 100
+		/if (${Ini[a2.ini,GlobalAvoid,Avoid${x1}].Length}==0) {
+			/ini a2.ini GlobalAvoid Avoid${x1} "${inString}"
+			/return
+		}
+	/next x1
+/return
 
 Sub AddAlerts
 
@@ -20,59 +77,26 @@ Sub AddAlerts
 /alert clear 60
 /delay 2
 
+/for lx 1 to 1000
+	/if (${Ini[a2.ini,GlobalAvoid,Avoid${lx}].Length}>0) {
+		/alert add 1 "${Ini[a2.ini,GlobalAvoid,Avoid${lx}]}"
+	} else {
+		/varset lx 1000
+	}
+/next lx
 
+/for lx 1 to 1000
+	/if (${Ini[a2.ini,${Zone.ShortName},Avoid${lx}].Length}>0) {
+		/alert add 1 "${Ini[a2.ini,${Zone.ShortName},Avoid${lx}]}"
+	} else {
+		/varset lx 1000
+	}
+/next lx
 
-/alert add 1 npc "steadfast servant"
-/alert add 1 npc race "teleport man"
-/alert add 1 npc race "invisible man"
-/alert add 1 npc "furious sentry"
-/alert add 1 npc "Tatsujiro the Serene"
-/alert add 1 npc "chaotic jester"
-/alert add 1 npc "The Butler"
-/alert add 1 npc "Lord Brekt"
-/alert add 1 npc "Norrath`s Keepers Guard"
-/alert add 1 npc "Vulak"
-/alert add 1 npc "Kerchak"
-/alert add 1 npc "guardian spirit"
-/alert add 1 npc "Caridwi"
-/alert add 1 npc "festering ooze"
-/alert add 1 npc "dusty barrel"
-/alert add 1 npc "Jaques the Infected"
-/alert add 1 npc "time bender"
-/alert add 1 npc "pioneer vulu"
-/alert add 1 npc "Jaelle Florica"
-/alert add 1 npc "Scout Madu"
-/alert add 1 npc "Blacktalon"
-/alert add 1 npc "Fabled Antibotter"
-/alert add 1 npc "jester of bristlebane"
-/alert add 1 npc "killer wasp"
-/alert add 1 npc "essence of fire"
-/alert add 1 npc "a menacing tree spirit"
-|/alert add 1 npc "a petrified colossal tree"
-|/alert add 1 npc "a hollow tree"
-/alert add 1 npc "Jagged Blades"
-/alert add 1 npc "Durgin Skell"
-/alert add 1 npc "Trakanon"
-/alert add 1 npc "a hatchling"
-/alert add 1 npc "The Quiet Wanderer"
-/alert add 1 npc "Moldmaster Gangii"
-/alert add 1 npc "a hill giant"
-/alert add 1 npc "Caridwa"
-/alert add 1 npc "Warm Light"
-/alert add 1 npc "Scount Madu"
-/alert add 1 npc "Pioneer Vulu"
-/alert add 1 npc "Jaelle Florica"
-/alert add 1 npc "Guardian Krogone"
-/alert add 1 npc "The Mechamatic Guardian"
-/alert add 1 npc "The Golden Maiden"
-/alert add 1 npc "005"
-/alert add 1 npc "Emissary Tinnvin"
 /alert add 2 pc ${Me.CleanName}
 
-
-|/alert add 55 pc radius 40
-
-|/alert add 56 group radius 40
+|/alert add 1 npc "a petrified colossal tree"
+|/alert add 1 npc "a hollow tree"
 
 /alert add 3 npc "pirate runners skiff"
 
