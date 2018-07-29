@@ -256,21 +256,23 @@ Sub LootMobs
  /declare CorpseToLoot int local
 
 
-
+/if (${DoLoot}==1) {
  /for i 1 to ${DeadCount}
 
-/if (${DoLoot}==1) {
+
  /varset CorpseList ${CorpseList}${NearestSpawn[${i},corpse radius ${CorpseRadius} noalert 25 range 1# 300# ].ID}|
+ /next i
 } 
 
 
- /next i
+ 
 
  /if (${DoLoot}==2) {
 	 /for lx 1 to 10 
 	 	/if (${namedMobsToLoot[${lx}]}>0) {
 			 /varset CorpseList ${CorpseList}${namedMobsToLoot[${lx}]}|
 		 }
+	 /next lx
  }
  
  
@@ -301,7 +303,7 @@ Sub LootMobs
 
  /varset CorpseToLoot ${Spawn[${CorpseList.Arg[${i},|]}].ID} 
 
-|	/vardata CorpseToLoot Spawn[${CorpseList.Arg[${i},|]}].ID
+
 :reLootDroga
  /if (${Spawn[${CorpseToLoot}].Deity.ID} || !${Spawn[${CorpseToLoot}].ID}) /goto :SkipCorpse
 

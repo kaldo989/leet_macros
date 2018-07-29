@@ -214,7 +214,8 @@ Sub BuffCheck
  /delay 1s
 
  |/Potionbelt activate 3
-/itemnotify ${FindItem[=Bottle of Adventure III].InvSlot} rightmouseup
+|/itemnotify ${FindItem[=Bottle of Adventure III].InvSlot} rightmouseup
+/call ClickItem "Bottle of Adventure III"
  /delay 10s ${Me.Buff["Bottle of Adventure III"].Duration.TotalSeconds}>120
 
  /delay 1s
@@ -230,8 +231,8 @@ Sub BuffCheck
  /delay 1s
 
  |/Potionbelt activate 4
-/itemnotify ${FindItem[=Distillate of Alacrity X].InvSlot} rightmouseup
-
+|/itemnotify ${FindItem[=Distillate of Alacrity X].InvSlot} rightmouseup
+/call ClickItem "Distillate of Alacrity X"
  /delay 5s ${Me.Buff["Elixir of Speed X"].Duration.TotalSeconds}>120
 
  /delay 1s
@@ -245,7 +246,8 @@ Sub BuffCheck
  /delay 5
 
  |/casting "Ring of Dain Frostreaver IV" -item
-/itemnotify ${FindItem[=Ring of Dain Frostreaver IV].InvSlot} rightmouseup
+|/itemnotify ${FindItem[=Ring of Dain Frostreaver IV].InvSlot} rightmouseup
+/call ClickItem "Ring of Dain Frostreaver IV"
  /delay 2s
 
  }
@@ -257,7 +259,8 @@ Sub BuffCheck
  /delay 5
 
  |/itemnotify rightfinger rightmouseup
- /itemnotify ${FindItem[=Stormeye Band].InvSlot} rightmouseup
+ |/itemnotify ${FindItem[=Stormeye Band].InvSlot} rightmouseup
+ /call ClickItem "Stormeye Band"
  /delay 2s
 
  }
@@ -267,7 +270,8 @@ Sub BuffCheck
 /if (${FindItemCount[=Bloody Mantle of Agony]} && ${Me.Buff["Sacred Striking Courage of Brell"].Duration.TotalSeconds}<300 && ${Spell["Sacred Striking Courage of Brell"].Stacks}) {	
 
  |/itemnotify shoulder rightmouseup
-/itemnotify ${FindItem[=Bloody Mantle of Agony].InvSlot} rightmouseup
+|/itemnotify ${FindItem[=Bloody Mantle of Agony].InvSlot} rightmouseup
+/call ClickItem "Bloody Mantle of Agony"
  /delay 1s
 
  }
@@ -275,7 +279,8 @@ Sub BuffCheck
  /if (${FindItemCount[=Ring of the Dreamslayer]} && ${Me.Buff["Ancestral Memories III"].Duration.TotalSeconds}<300 && ${Spell["Ancestral Memories III"].Stacks}) {	
 
  |/itemnotify shoulder rightmouseup
-/itemnotify ${FindItem[=Ring of the Dreamslayer].InvSlot} rightmouseup
+|/itemnotify ${FindItem[=Ring of the Dreamslayer].InvSlot} rightmouseup
+/call ClickItem "Ring of the Dreamslayer"
  /delay 1s
 
  }
@@ -283,7 +288,8 @@ Sub BuffCheck
 /if (${FindItemCount[=Earring of Reverie]} && ${Me.Buff["Might of Stone VI"].Duration.TotalSeconds}<300 && ${Spell["Might of Stone VI"].Stacks}) {	
 
  |/itemnotify shoulder rightmouseup
-/itemnotify ${FindItem[=Earring of Reverie].InvSlot} rightmouseup
+|/itemnotify ${FindItem[=Earring of Reverie].InvSlot} 
+/call ClickItem "Earring of Reverie"
  /delay 1s
 
  }
@@ -293,7 +299,8 @@ Sub BuffCheck
  /delay 5
 
  |/casting "Ring of Slaughtering Cures" -item
-/itemnotify ${FindItem[=Ring of Slaughtering Cures].InvSlot} rightmouseup
+|/itemnotify ${FindItem[=Ring of Slaughtering Cures].InvSlot} rightmouseup
+/call ClickItem "Ring of Slaughtering Cures"
  /delay 3s
 
  }
@@ -305,7 +312,8 @@ Sub BuffCheck
  /delay 5
 
  |/casting "Golden Dragonlinked Chestguard" - item	
-/itemnotify ${FindItem[=Golden Dragonlinked Chestguard].InvSlot} rightmouseup
+|/itemnotify ${FindItem[=Golden Dragonlinked Chestguard].InvSlot} rightmouseup
+/call ClickItem "Golden Dragonlinked Chestguard"
  /varset ChestTimer 1s
 
  /delay 3s ${Me.Song[Circle of Power III].ID}

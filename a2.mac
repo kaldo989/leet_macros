@@ -701,10 +701,10 @@ Sub Combat
 
  /if (!${Me.Buff[Bladestorm Attunement].ID} && ${FindItemCount[=Perspicuous Coat of the Swift]} && !${ChestTimer} && ${DoBlades}) {
 
- |/itemnotify chest rightmouseup
  
-/itemnotify ${FindItem[Perspicuous Coat of the Swift].InvSlot} rightmouseup
-
+ 
+|/itemnotify ${FindItem[Perspicuous Coat of the Swift].InvSlot} rightmouseup
+/call ClickItem "Perspicuous Coat of the Swift"
  /varset ChestTimer 1s
 
  /delay 1s ${Me.Buff[Bladestorm Attunement].ID}
@@ -719,8 +719,8 @@ Sub Combat
 
 	/delay 5
 
-	/itemnotify mainhand rightmouseup
-
+	|/itemnotify mainhand rightmouseup
+	/call ClickItem "Warwolf`s Cry of Torment"
 	/varset EpicTimer 80s
 
 	/delay 2
@@ -729,7 +729,8 @@ Sub Combat
 /if (${Me.Class.ShortName.Equal[MNK]} && !${EpicTimer} && ${Cast.Ready[The  Sepukku]}) {
 	/delay 2
 	|/itemnotify ${FindItem[The  Sepukku].InvSlot} rightmouseup
-	/itemnotify mainhand rightmouseup
+	|/itemnotify mainhand rightmouseup
+	/call ClickItem "The  Sepukku"
 	/delay 5
 	/varset EpicTimer 90s
 }
@@ -756,12 +757,12 @@ Sub Combat
 
 		/delay 5
 
-		/itemnotify mainhand rightmouseup
-
+		|/itemnotify mainhand rightmouseup
+		/call ClickItem "Warwolf`s Cry of Torment"
 		/delay 2
 			
-		/casting "The Composer" - item
-			
+		|/casting "The Composer" - item
+		/call ClickItem "The Composer"
 		/delay 2
 			
 		/varset EpicTimer 125s
@@ -775,8 +776,8 @@ Sub Combat
 /if (${Me.Class.ShortName.Equal[BRD]} && ${Me.Song[Spirit of Vesagran].Duration.TotalSeconds}<10 && ${FindItemCount[=Colada]} && !${EpicTimer})  {
 	/delay 5
 
-	/itemnotify mainhand rightmouseup
-
+	|/itemnotify mainhand rightmouseup
+	/call ClickItem "Spirit of Vesagran"
 	/varset EpicTimer 50s
 
 	/delay 2
@@ -788,33 +789,38 @@ Sub Combat
 	
 	|/potionbelt activate 1
 	
-	/itemnotify ${FindItem[Distillate of Celestial Healing XVI].InvSlot} rightmouseup
+	|/itemnotify ${FindItem[Distillate of Celestial Healing XVI].InvSlot} rightmouseup
+	/call ClickItem "Distillate of Celestial Healing XVI"
 	/varset HealHot 5
  }
  
  /if (${FindItemCount[Distillate of Divine Healing XV]}>0 &&  ${FindItem[Distillate of Divine Healing XV].TimerReady} == 0 && ${Me.PctHPs} <= 65 && ${Cast.Ready}) {
 	
 	|/potionbelt activate 2
-	/itemnotify ${FindItem[Distillate of Divine Healing XV].InvSlot} rightmouseup
+	|/itemnotify ${FindItem[Distillate of Divine Healing XV].InvSlot} rightmouseup
+	/call ClickItem "Distillate of Divine Healing XV"
 	
  }
  
  /if ( ${FindItemCount[Frosted Cuirass of Enlightenment]}>0 && ${Me.Song[Circle of Power III].Duration}<=3 && ${Cast.Ready}) {
 	 
 	|/itemnotify chest rightmouseup
-	/itemnotify ${FindItem[Frosted Cuirass of Enlightenment].InvSlot} rightmouseup
+	|/itemnotify ${FindItem[Frosted Cuirass of Enlightenment].InvSlot} rightmouseup
+	/call ClickItem "Frosted Cuirass of Enlightenment"
  }
 
 /if ( ${FindItemCount[Golden Dragonlinked Chestguard]}>0 && ${Me.Song[Circle of Power III].Duration}<=3 && ${Cast.Ready}) {
 	 
 	|/itemnotify chest rightmouseup
-	/itemnotify ${FindItem[Golden Dragonlinked Chestguard].InvSlot} rightmouseup
+	|/itemnotify ${FindItem[Golden Dragonlinked Chestguard].InvSlot} rightmouseup
+	/call ClickItem "Golden Dragonlinked Chestguard"
  }
 
  /if ( ${FindItemCount[Supple White Tunic]}>0 && ${Me.Song[Circle of Power III].Duration}<=3 && ${Cast.Ready}) {
 	 
 	|/itemnotify chest rightmouseup
-	/itemnotify ${FindItem[Supple White Tunic].InvSlot} rightmouseup
+	|/itemnotify ${FindItem[Supple White Tunic].InvSlot} rightmouseup
+	/call ClickItem "Supple White Tunic"
 	
  }
  /call dispell_with_ring
@@ -901,7 +907,8 @@ Sub LootTime
 
 /if (${FindItemCount[Bag of Gold Token]}) {-
 	/delay 3
-	/itemnotify ${FindItem[Bag of Gold Token].InvSlot} rightmouseup
+	|/itemnotify ${FindItem[Bag of Gold Token].InvSlot} rightmouseup
+	/call ClickItem "Bag of Gold Token"
 	/delay 3
 }
 
@@ -1554,7 +1561,10 @@ Sub CheckLdon
 
 Sub CheckNamedList
 	/for lx 1 to 10
-		/if (${namedMobsToLoot[${lx}]}==${Target.ID}) /return
+		/if (${namedMobsToLoot[${lx}]}==${Target.ID}) {
+			/if (!${Spawn[${namedMobsToLoot[${lx}]}].ID}) /varset namedMobsToLoot[${lx}] 0
+			/return
+		}
 	/next lx
 
 	/for lx 1 to 10
@@ -1564,4 +1574,54 @@ Sub CheckNamedList
 			/return
 		}
 	/next lx
+/return
+
+Sub ClickItem(itemToClick)
+|**
+/if (${FindItemCount[=${itemToClick}]}==0 || ${Me.Stunned} || ${Me.Casting.ID} || ${FindItem[=${itemToClick}].TimerReady} || !${Cast.Ready[${itemToClick}]}) {
+	|/echo ClickItem failed first check when clicking ${itemToClick}
+	/return
+}
+**|
+/if (${FindItemCount[=${itemToClick}]}==0) {
+	/echo ClickItem .. missing ${itemToClick}
+	/return
+}
+
+/if (${Me.Stunned}) {
+	/echo ClickItem Stunned! ${itemToClick}
+	/return
+}
+
+/if (${Me.Casting.ID}) {
+	/echo CastItem already casting. ${itemToClick}
+	/return
+}
+
+/if (${FindItem[=${itemToClick}].TimerReady}) {
+	/echo ClickItem Cooldown ${FindItem[=${itemToClick}].TimerReady} on ${itemToClick}
+	/return
+}
+
+/if (!${Cast.Ready[${itemToClick}]}) {
+	/echo ClickItem Cast not ready! ${itemToClick}
+}
+/declare rightClass int local 0
+
+/for lx 1 to ${FindItem[=${itemToClick}].Classes}
+	/if (${FindItem[=${itemToClick}].Class[${lx}].ShortName.Equal[${Me.Class.ShortName}]}) /varset rightClass 1
+/next lx
+
+/if (${rightClass}==0) {
+	/echo ClickItem failed classcheck when clicking ${itemToClick}
+	/return
+}
+
+/if (${FindItem[=${itemToClick}].InvSlot}==0) {
+	/echo ClickItem Failed to click ${itemToClick} InvSlot=NULL
+	/return
+}
+/echo Clicking ${itemToClick}
+/itemnotify ${FindItem[=${itemToClick}].InvSlot} rightmouseup
+/delay 5
 /return
