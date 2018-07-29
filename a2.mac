@@ -42,7 +42,7 @@ sub Main
 
 |Alerts are defined in the A2.Inc. Will not kill mobs on alert list 1, have to go to the auto.inc to add alerts. Alerts are cleared when logging.|
 
-
+/declare lx int outer 
 
  /declare KillZone int outer ${Zone.ID}
 
@@ -173,7 +173,11 @@ sub Main
 
  /if (${Defined[Param0]}) /varset DoLoot ${Param0}
 
- /if (${DoLoot}==2) /echo Looting nameds only!
+ /if (${DoLoot}==2) {
+	 /echo Looting nameds only!
+	 /declare namedMobsToLoot[10] int outer
+	 
+ } 
 
  /if (${Defined[Param1]}) /varset MaxRad ${Param1}
  /declare parmLoop int local
@@ -560,10 +564,7 @@ Sub KillObject
 
 Sub Combat
 
- /if (${LootNamed}) /varset DoLoot 0
-
-
-
+ 
  :kill_outer
 
  /varset KillTimer ${KillTime}s
@@ -612,18 +613,10 @@ Sub Combat
  }
 
 
-
-
-
- /if ((${Target.Named} || ${Target.Name.Left[1].Equal[#]}) && ${LootNamed}) {
-
- /varset DoLoot 1
-
- /varset CorpseRadius 30
-
- }
-
-
+/if ( ${DoLoot}==2 && (${Target.Named} || ${Target.Name.Left[1].Equal[#]}) ) {
+	
+	/call CheckNamedList
+}
 
  /if (!${Me.Standing}) /stand
 
@@ -633,7 +626,7 @@ Sub Combat
 
  /if (${Target.ID} && !${Stick.Status.Equal[ON]}) {
 
- /stick 12 moveback 
+ /stick 7 moveback 
 
  /face fast nolook
 
@@ -668,14 +661,7 @@ Sub Combat
 
  }
 
- /if (${Zone.ID}==397) {
-	/if (${Me.Pet.Distance} >= 100 && ${Me.AltAbilityReady[Summon Companion]}) {
-		|/alt act 1215
-		/nomodkey /keypress 4
-		/delay 1s !${Me.AltAbilityReady[Summon Companion]}
-	}
-}
-
+ 
 /if (${Zone.ID}==81) {
 	|Droga checks
 	
@@ -692,13 +678,6 @@ Sub Combat
 
  
 
-| /if (${Target.ID} && !${Target.Type.Equal[PC]} && !${Target.CleanName.Right[9].Equal['s Corpse]} && ${Target.DistanceZ}>50 && ${Target.Distance} < 20) {
-
-| /warp target
-
-| /delay 5
-
-| }
 
 /if (${Me.Pet.ID} && !${spamTimer}) {
 
@@ -711,8 +690,6 @@ Sub Combat
  /varset npcID ${Target.ID}	
 
  /if (${npcID}) /alert add 1 ID ${npcID}
-
-| /warp wp clear
 
  /delay 2
 
@@ -1573,4 +1550,18 @@ Sub LeaveDrogaInstance
 Sub CheckLdon
 /declare ldonZones string local guka,ruja,taka,mira,mmca,gukb,rujb,takb,mirb,mmcb,gukc,rujc,takc,mirc,mmcc,gukd,rujd,takd,mird,mmcd,guke,ruje,take,mire,mmce,gukf,rujf,takf,mirf,mmcf,gukg,rujg,takg,mirg,mmcg,gukh,rujh,takh,mirh,mmch,ruji,taki,miri,mmci,rujj,takj,mirj,mmcj
 /if (${ldonZones.Find[${Zone.ShortName}]}) /varset IsLdon 1
+/return
+
+Sub CheckNamedList
+	/for lx 1 to 10
+		/if (${namedMobsToLoot[${lx}]}==${Target.ID}) /return
+	/next lx
+
+	/for lx 1 to 10
+		/if (${namedMobsToLoot[${lx}]}==0 ) {
+			/varset namedMobsToLoot[${lx}] ${Target.ID}
+			/echo Added ${Target.CleanName} To named loot list!
+			/return
+		}
+	/next lx
 /return

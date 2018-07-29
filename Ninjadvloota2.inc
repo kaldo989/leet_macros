@@ -221,9 +221,18 @@ Sub LootMobs
 
 /if (${DoLoot}==1) {
  	/declare DeadCount int local ${SpawnCount[corpse radius ${CorpseRadius} noalert 25 range 1# 300# ]}
- } else {
+ } 
+ 
+ /if (${DoLoot}==2) {
 
-	/declare DeadCount int local ${SpawnCount[corpse radius ${CorpseRadius} # noalert 25 range 1# 300# ]}
+	|/declare DeadCount int local ${SpawnCount[corpse radius ${CorpseRadius} # noalert 25 range 1# 300# ]}
+	/declare ncount int local 0
+	/for lx 1 to 10
+		/if ( ${namedMobsToLoot[${lx}]} > 0 ) /varset ncount ${Math.Calc[${ncount}+1]}
+	/next lx
+
+	/declare DeadCount int local ${ncount}
+	/echo Looting ${ncount} Named mobs!
  }
  /call CheckXTargetAggro
  /if (!${LootMobs} || ${Macro.Return}>0 || ${SpawnCount[npc radius ${MobsTooClose} range 1# 300# noalert ${AlertList} ]} || !${DeadCount} || ${Me.Combat} || (${Cursor.NoDrop} && !${Me.FreeInventory})) {
@@ -252,11 +261,18 @@ Sub LootMobs
 
 /if (${DoLoot}==1) {
  /varset CorpseList ${CorpseList}${NearestSpawn[${i},corpse radius ${CorpseRadius} noalert 25 range 1# 300# ].ID}|
-} else {
-	/varset CorpseList ${CorpseList}${NearestSpawn[${i},corpse radius ${CorpseRadius} # noalert 25 range 1# 300# ].ID}|
-}
+} 
+
+
  /next i
 
+ /if (${DoLoot}==2) {
+	 /for lx 1 to 10 
+	 	/if (${namedMobsToLoot[${lx}]}>0) {
+			 /varset CorpseList ${CorpseList}${namedMobsToLoot[${lx}]}|
+		 }
+ }
+ 
  
 
  /for i 1 to ${DeadCount}
@@ -467,7 +483,13 @@ Sub LootCorpse
 	
 	}
 |/echo LootDone!
-
+/if (${DoLoot}==2 && ${Target.ID}) {
+	
+	 /for lx 1 to 10
+	 	/if (${namedMobsToLoot[${lx}]}==${Target.ID}) {
+			 /echo Removed ${Target.CleanName} from Named Loot list.
+ 			 /varset namedMobsToLoot[${lx}] 0
+ }
  /if (${Target.ID}) {
 
  /squelch /alert add 25 id ${Target.ID}
@@ -487,6 +509,8 @@ Sub LootCorpse
  /delay 1s !${Corpse.Open}
 
  /if (${Corpse.Open}) /goto :clickdoneffs
+
+ 
 
 /return
 
