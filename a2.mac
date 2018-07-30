@@ -1464,13 +1464,13 @@ sub Event_GotHit(Line,mobName)
 /return
 
 sub Event_GotHitDmg(Line,mobName)
-	/echo GotHitDmg:${mobName} T:${MeleeGotHitLastTimer}
+	|/echo GotHitDmg:${mobName} T:${MeleeGotHitLastTimer}
 	/if (${Target.CleanName.Equal[${mobName}]}) /varset MeleeHitLastTimer ${MeleeTimeOutDuration}
 	/varset MeleeGotHitLastTimer 10s
 /return
 sub Event_Hit
 	|/echo GotHit timer ${MeleeHitLastTimer}
-	/echo GotHit:${mobName} T:${MeleeGotHitLastTimer}
+	|/echo GotHit:${mobName} T:${MeleeGotHitLastTimer}
 	/varset MeleeHitLastTimer ${MeleeTimeOutDuration}
 	/varset MeleeGotHitLastTimer 10s
 /return
