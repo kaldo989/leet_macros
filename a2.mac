@@ -60,6 +60,7 @@ sub Main
  /declare WaitingOnRespawn timer outer 0
  /declare MeleeHitLastTimer timer outer 0
  /declare MeleeGotHitLastTimer timer outer 0
+ /declare MeleeGotMissedLastTimer timer outer 0
 
  /call CheckLdon
  /if (${IsLdon}) {
@@ -594,9 +595,11 @@ Sub KillObject
 /return
 
 Sub Combat
-
+/echo Combat Start!
  /varset MeleeHitLastTimer ${MeleeTimeOutDuration}
  /varset MeleeGotHitLastTimer 10s
+ /varset MeleeGotMissedLastTimer 10s
+ 
  :kill_outer
 
 
@@ -687,8 +690,10 @@ Sub Combat
 	/if (${Macro.Return}==1 && !${MeleeGotHitLastTimer}) {
 		/echo Ldon DS kill..
 		/attack off
+		/combat off
 		/stick off
 		/sit
+		/delay 5
 		/delay 2s !${Target.ID} || ${Me.Standing}
 	}
 }
@@ -1471,8 +1476,8 @@ sub Event_GotHitDmg(Line,mobName)
 sub Event_Hit
 	|/echo GotHit timer ${MeleeHitLastTimer}
 	|/echo GotHit:${mobName} T:${MeleeGotHitLastTimer}
-	/varset MeleeHitLastTimer ${MeleeTimeOutDuration}
-	/varset MeleeGotHitLastTimer 10s
+	|/varset MeleeHitLastTimer ${MeleeTimeOutDuration}
+	/varset MeleeGotMissedLastTimer 10s
 /return
 
 sub Event_MobDeath(Line,mobName)
