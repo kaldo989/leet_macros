@@ -174,6 +174,11 @@ Sub ALLoadVar(IniSection,IniVar,IniValue,VarType)
 Sub Event_ALCantLoot(Line)
 |/squelch /alert add 25 id ${ALDontLoot}
 /varset CorpseTries ${Math.Calc[${CorpseTries}+1]}
+/if (${CorpseTries}>9) {
+		
+		 /varset ALDontLoot ${Target.ID}
+		 
+}
 /return 
 
 Sub Event_EEALCantLoot(Line)
@@ -401,6 +406,7 @@ Sub LootCorpse
  /doevents ALCantLoot
  
  /if (${CorpseTries}>9) {
+	 /varset ALDontLoot ${Target.ID}
  	/squelch /alert add 25 id ${ALDontLoot}
 	 /echo Failed to loot 5 times ignoring...
 	/return

@@ -1,4 +1,4 @@
-
+#turbo 40
 
 #include Ninjadvloota2.inc
 
@@ -9,7 +9,7 @@
 #event TargetOoR "#*#Your target is too far away, get closer!#*#"
 #event TargetOoR "#*#You cannot see your target.#*#"
 #event MobDeath "#*#You have slain #1#!"
-#Event GotHit   "#1#YOU for#*#points of damage."
+#Event GotHitDmg   "#1#YOU for#*#points of damage."
 #Event GotHit   "#1# tries to #*# YOU, but #*#" 
 
 #event Hit "#*#YOU #*# for #*# points of damage."
@@ -59,6 +59,8 @@ sub Main
  /declare IsLdon int outer 0
  /declare WaitingOnRespawn timer outer 0
  /declare MeleeHitLastTimer timer outer 0
+ /declare MeleeGotHitLastTimer timer outer 0
+
  /call CheckLdon
  /if (${IsLdon}) {
 	 
@@ -594,6 +596,7 @@ Sub KillObject
 Sub Combat
 
  /varset MeleeHitLastTimer ${MeleeTimeOutDuration}
+ /varset MeleeGotHitLastTimer 10s
  :kill_outer
 
 
@@ -681,10 +684,12 @@ Sub Combat
 	
 	|Ldon Trap mob if we only have one aggro mob sit down and let it kill it self.
 	/call CheckXTarget
-	/if (${Macro.Return}==1) {
+	/if (${Macro.Return}==1 && !${MeleeGotHitLastTimer}) {
+		/echo Ldon DS kill..
 		/attack off
+		/stick off
 		/sit
-		/delay 2s !${Target.ID}
+		/delay 2s !${Target.ID} || ${Me.Standing}
 	}
 }
  
@@ -1458,10 +1463,16 @@ sub Event_GotHit(Line,mobName)
 	/if (${Target.CleanName.Equal[${mobName}]}) /varset MeleeHitLastTimer ${MeleeTimeOutDuration}
 /return
 
-
+sub Event_GotHitDmg(Line,mobName)
+	/echo GotHitDmg:${mobName} T:${MeleeGotHitLastTimer}
+	/if (${Target.CleanName.Equal[${mobName}]}) /varset MeleeHitLastTimer ${MeleeTimeOutDuration}
+	/varset MeleeGotHitLastTimer 10s
+/return
 sub Event_Hit
-	|/echo Hit timer ${MeleeHitLastTimer}
+	|/echo GotHit timer ${MeleeHitLastTimer}
+	/echo GotHit:${mobName} T:${MeleeGotHitLastTimer}
 	/varset MeleeHitLastTimer ${MeleeTimeOutDuration}
+	/varset MeleeGotHitLastTimer 10s
 /return
 
 sub Event_MobDeath(Line,mobName)
