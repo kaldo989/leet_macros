@@ -593,7 +593,7 @@ Sub KillObject
 
 Sub Combat
 
- /varset MeleeHitLastTimer MeleeTimeOutDuration
+ /varset MeleeHitLastTimer ${MeleeTimeOutDuration}
  :kill_outer
 
 
@@ -850,7 +850,7 @@ Sub Combat
 
 /if (!${MeleeHitLastTimer}) {
 	 /echo Melee timed out with no hits after MeleeTimeOutDuration! Ignoring mob...
-	 /alert add 1 ID ${Target.ID}
+	 /if (${Target.ID})  /alert add 1 ID ${Target.ID}
 	 /target clear
  }
 
@@ -1455,13 +1455,13 @@ Sub dispell_with_ring
 
 sub Event_GotHit(Line,mobName)
 	|/echo HitMiss:${mobName}
-	/if (${Target.CleanName.Equal[${mobName}]}) /varset MeleeHitLastTimer MeleeTimeOutDuration
+	/if (${Target.CleanName.Equal[${mobName}]}) /varset MeleeHitLastTimer ${MeleeTimeOutDuration}
 /return
 
 
 sub Event_Hit
 	|/echo Hit timer ${MeleeHitLastTimer}
-	/varset MeleeHitLastTimer MeleeTimeOutDuration
+	/varset MeleeHitLastTimer ${MeleeTimeOutDuration}
 /return
 
 sub Event_MobDeath(Line,mobName)
