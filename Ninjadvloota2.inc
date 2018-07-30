@@ -174,6 +174,8 @@ Sub ALLoadVar(IniSection,IniVar,IniValue,VarType)
 Sub Event_ALCantLoot(Line)
 |/squelch /alert add 25 id ${ALDontLoot}
 /varset CorpseTries ${Math.Calc[${CorpseTries}+1]}
+/call WarpPointOnCircle ${Target.ID} ${Math.Rand[360]} 4
+/delay 5
 /if (${CorpseTries}>9) {
 		
 		 /varset ALDontLoot ${Target.ID}
