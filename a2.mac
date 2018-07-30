@@ -1,6 +1,4 @@
 
-|timer since last melee hit..
-#define MeleeTimeOutDuration 45s
 
 #include Ninjadvloota2.inc
 
@@ -87,8 +85,23 @@ sub Main
  /declare TargMax int outer
 
 
+/declare MeleeTimeOutDuration string outer
+/if (${Ini[a2.ini,${Zone.ShortName},MeleeTimeOut].Length}>0) {
+	/varset MeleeTimeOutDuration ${Ini[a2.ini,${Zone.ShortName},MeleeTimeOut]}
+	/echo MeleeTimeOutDuration Set to ${MeleeTimeOutDuration} from a2.ini [${Zone.ShortName}]
+	
+}
 
+/if (${MeleeTimeOutDuration.Length}==0 && ${Ini[a2.ini,a2,MeleeTimeOut].Length}>0) {
+	/varset MeleeTimeOutDuration ${Ini[a2.ini,a2,MeleeTimeOut]}
+	/echo MeleeTimeOutDuration Set to ${MeleeTimeOutDuration} from a2.ini [a2]
+	
+}
 
+/if (${MeleeTimeOutDuration.Length}==0) {
+	/ini a2.ini a2 MeleeTimeOut 45s
+	/varset MeleeTimeOutDuration 45s
+}
 /declare spamTimer timer outer
 |How far and how high to target|
 
@@ -664,7 +677,7 @@ Sub Combat
  }
 
 
-/if (${Target.ID} && ${Target.Name.Length}<=3 && ${Int[${Target.Name}]}>0) {
+/if ( ${IsLdon} && ${Target.ID} && ${Target.Name.Length}<=3 && ${Int[${Target.Name}]}>0) {
 	
 	|Ldon Trap mob if we only have one aggro mob sit down and let it kill it self.
 	/call CheckXTarget
