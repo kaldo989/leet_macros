@@ -228,7 +228,10 @@ Sub LootMobs
 	|/declare DeadCount int local ${SpawnCount[corpse radius ${CorpseRadius} # noalert 25 range 1# 300# ]}
 	/declare ncount int local 0
 	/for lx 1 to 10
-		/if ( ${namedMobsToLoot[${lx}]} > 0 ) /varset ncount ${Math.Calc[${ncount}+1]}
+		/if ( ${namedMobsToLoot[${lx}]} > 0 ) {
+			/if (${Spawn[${namedMobsToLoot[${lx}]}].Type.Equal[Corpse]}) /varset ncount ${Math.Calc[${ncount}+1]}
+			/if (${Spawn[${namedMobsToLoot[${lx}]}].Type.Equal[Npc]}) /varset namedMobsToLoot[${lx}] 0
+		}
 	/next lx
 
 	/declare DeadCount int local ${ncount}

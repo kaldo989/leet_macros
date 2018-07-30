@@ -835,26 +835,26 @@ Sub Combat
 	
  }
 
- 
- /call dispell_with_ring
- /goto :have_target
-
- }
-
 /if (!${MeleeHitLastTimer}) {
 	 /echo Melee timed out with no hits after MeleeTimeOutDuration! Ignoring mob...
 	 /alert add 1 ID ${Target.ID}
 	 /target clear
  }
 
- /if (${SpawnCount[npc radius ${MaxRad2} zradius ${MaxZ2} targetable noalert 1 range ${TargMin} ${TargMax}]}) {
 
- /squelch /tar npc radius ${MaxRad2} zradius ${MaxZ2} targetable noalert 1 range ${TargMin} ${TargMax}
+
+ /call dispell_with_ring
+ /goto :have_target
 
  }
 
 
 
+ /if (${SpawnCount[npc radius ${MaxRad2} zradius ${MaxZ2} targetable noalert 1 range ${TargMin} ${TargMax}]}) {
+
+ /squelch /tar npc radius ${MaxRad2} zradius ${MaxZ2} targetable noalert 1 range ${TargMin} ${TargMax}
+
+ }
 
 
  /if (${Target.ID}) {
@@ -1625,6 +1625,7 @@ Sub ClickItem(itemToClick)
 	/return
 }
 
+/if (!${Me.Standing}) /return
 /if (${Me.Stunned}) {
 	/echo ClickItem Stunned! ${itemToClick}
 	/return
