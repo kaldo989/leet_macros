@@ -620,7 +620,7 @@ sub Main
 /return
 
 Sub WaitForInstanceSpawn2
-	/declare bailOutTimer timer local 15s
+	/declare bailOutTimer timer local 25s
 	/declare mobcount2 int local ${SpawnCount[npc]}
 	:dlyLoop
 	/if (${SpawnCount[npc]}> ${mobcount2} ) {
