@@ -13,6 +13,12 @@
 #Event GotHit   "#1# tries to #*# YOU, but #*#" 
 #Event LockedObj "#*#You cannot open #1#,#*#"
 #event Hit "#*#YOU #*# #1# for #*# points of damage."
+#Event GainSoloExp "#*#You gain experience!!"
+
+#Event LdonCountMob "#*#Population : #1#"
+#Event LdonReset "#*#A loud scream fills the cavern#*#A little stronger than before"
+
+
 |Hail after warp. Helps with resyncing after warp
 #define hailIt 1
 |#of inventory slots free to trigger a sell
@@ -62,11 +68,20 @@ sub Main
  /declare MeleeGotHitLastTimer timer outer 0
  /declare MeleeGotMissedLastTimer timer outer 0
 
+ /declare InstanceReSpawning int outer 0
+ /declare InstanceNumResets int outer 0
+ /declare InstanceCurrentMobCount int outer 0
+ /declare InstanceMaxMobCount int outer 0
+
+ /declare InstanceAvgLvl float outer 0
+
  /call CheckLdon
  /if (${IsLdon}) {
 	 
 	 /echo In LDON!
 	 /declare LdonBoss string outer ${Ini[a2.ini,Ldons,Bosses]}
+	 
+	 
  }
  /declare ReclaimInvOpenOnce int outer 0
 |How many levels below or above you want to kill|
@@ -559,7 +574,36 @@ sub Main
 		/call KillObject
 		/goto :Waiting
 	}
+
+	
 }
+
+/if (${InstanceReSpawning}) {
+	
+	/varset InstanceReSpawning 0
+	/echo Starting Wait for respawn!
+	|/call WaitForInstanceSpawn
+	|/delay 10s
+	/beep
+	
+	/call WaitForInstanceSpawn2
+	/echo Respawn DONE!
+	
+	/for lx 1 to ${npc noalert 1}
+		/if (${LdonBoss.Find[/${NearestSpawn[${lx},npc noalert 1].CleanName}/]}) {
+			/echo Ldon SuperBoss!! ..: ${NearestSpawn[${lx},npc noalert 1].CleanName} :..
+			/beep
+			/beep
+			/beep
+			/warp s
+			/endm
+			/varset lx 10000
+			/goto :startpoint
+		}
+	/next lx
+	/goto :startpoint
+}
+
 /delay 10s ${Target.ID}
 
 /if ((${Zone.ID}==81 || ${Zone.ID}==90) && !${WaitingOnRespawn}) {
@@ -574,6 +618,43 @@ sub Main
 
 
 /return
+
+Sub WaitForInstanceSpawn2
+	/declare bailOutTimer timer local 15s
+	/declare mobcount2 int local ${SpawnCount[npc]}
+	:dlyLoop
+	/if (${SpawnCount[npc]}> ${mobcount2} ) {
+		/varset mobcount2 ${SpawnCount[npc]}
+		/delay 5
+		/goto :dlyLoop
+	}
+
+	/if (${mobcount2}>0) /call AverageLvlOfMobs
+
+	/if (${Macro.Return}>=${InstanceAvgLvl}) {
+		
+		/if ( ${InstanceAvgLvl} < ${Macro.Return}) {
+			/varset InstanceAvgLvl ${Macro.Return}
+			/delay 5
+			/goto :dlyLoop
+		}
+		/return
+
+	}
+	/delay 1
+	/if (!${bailOutTimer}) /return
+	/goto :dlyLoop
+
+/return
+
+Sub AverageLvlOfMobs
+	|/echo Avg.....
+	/declare tempSum float local
+
+	/for lx 1 to ${SpawnCount[npc]}
+		/varset tempSum ${Math.Calc[${tempSum}+${NearestSpawn[${lx},npc].Level}]}
+	/next lx
+/return ${Math.Calc[${tempSum}/${SpawnCount[npc]}]}
 
 Sub KillObject
 /declare tarID int local
@@ -1048,8 +1129,9 @@ Sub Zonecheck
 	/delay 2s
 	/warp wp safe
 	/varcalc DeathCounter ${Math.Calc[${DeathCounter}+1]}
-	/timed 30s /macro a2 ${DoLoot} ${MaxRad} named
+	|/timed 30s /macro a2 ${DoLoot} ${MaxRad} named
 	|/goto :startpoint
+	/return
  }
  
  /if (${ZoneIDStarted}==81) {
@@ -1496,8 +1578,28 @@ Sub dispell_with_ring
 	}
 /return
 
+Sub Event_GainSoloExp
+	/varset MeleeGotHitLastTimer 10s
+	/varset MeleeGotMissedLastTimer 10s
+/return
+
+Sub Event_LdonReset(Line)
+	/varset InstanceNumResets ${Math.Calc[${InstanceNumResets}+1]}
+	/varset InstanceReSpawning 1
+	
+/return
+
+Sub Event_LdonCountMob(Line,numMob)
+	/varset InstanceCurrentMobCount ${Int[${numMob}]}
+	/if (${Math.Calc[${InstanceCurrentMobCount}+1]}>${InstanceMaxMobCount}) /varset InstanceMaxMobCount ${Math.Calc[${InstanceCurrentMobCount}+1]}
+	/if (${InstanceAvgLvl}==0) {
+	 /call AverageLvlOfMobs
+	 /varset InstanceAvgLvl ${Macro.Return}
+	}
+/return
+
 sub Event_LockedObj(Line,objName)
-	/echo Hit LockedObj ${objName}
+	|/echo Hit LockedObj ${objName}
 	/if (${Target.CleanName.Equal[${objName}]}) /alert add 1  id ${Target.ID}
 /return
 
