@@ -12,7 +12,7 @@
 #Event GotHitDmg   "#1#YOU for#*#points of damage."
 #Event GotHit   "#1# tries to #*# YOU, but #*#" 
 
-#event Hit "#*#YOU #*# for #*# points of damage."
+#event Hit "#*#YOU #*# #1# for #*# points of damage."
 |Hail after warp. Helps with resyncing after warp
 #define hailIt 1
 |#of inventory slots free to trigger a sell
@@ -683,19 +683,22 @@ Sub Combat
  }
 
 
-/if ( ${IsLdon} && ${Target.ID} && ${Target.Name.Length}<=3 && ${Int[${Target.Name}]}>0) {
+/if ( ${IsLdon} && ${Target.ID}) {
 	
 	|Ldon Trap mob if we only have one aggro mob sit down and let it kill it self.
 	/call CheckXTarget
-	/if (${Macro.Return}==1 && !${MeleeGotHitLastTimer}) {
+	|/echo ${Macro.Return} && !${MeleeGotHitLastTimer} && ${MeleeGotMissedLastTimer}
+	/if (${Macro.Return}==1 && !${MeleeGotHitLastTimer} && ${MeleeGotMissedLastTimer}) {
 		/echo Ldon DS kill..
 		/attack off
 		/combat off
 		/stick off
 		/sit
 		/delay 5
-		/delay 2s !${Target.ID} || ${Me.Standing}
+		/delay 5s !${Target.ID} || ${Me.Standing}
 	}
+
+	
 }
  
 
@@ -1465,21 +1468,24 @@ Sub dispell_with_ring
 
 sub Event_GotHit(Line,mobName)
 	|/echo HitMiss:${mobName}
-	/if (${Target.CleanName.Equal[${mobName}]}) /varset MeleeHitLastTimer ${MeleeTimeOutDuration}
+	/if (${Target.CleanName.Equal[${mobName}]}) /varset MeleeGotMissedLastTimer 10s
+	|/varset MeleeGotMissedLastTimer 10s
+	|/echo GotMissed..
 /return
 
 sub Event_GotHitDmg(Line,mobName)
-	|/echo GotHitDmg:${mobName} T:${MeleeGotHitLastTimer}
-	/if (${Target.CleanName.Equal[${mobName}]}) /varset MeleeHitLastTimer ${MeleeTimeOutDuration}
+	/echo GotHitDmg:${mobName} T:${MeleeGotHitLastTimer}
+	|/if (${Target.CleanName.Equal[${mobName}]}) /varset MeleeHitLastTimer ${MeleeTimeOutDuration}
+	|/echo gotHitForDMG
 	/varset MeleeGotHitLastTimer 10s
 /return
-sub Event_Hit
+sub Event_Hit(Line,mobName)
+	|/echo Hit:${mobName}
 	|/echo GotHit timer ${MeleeHitLastTimer}
-	|/echo GotHit:${mobName} T:${MeleeGotHitLastTimer}
+	|/echo MeleeHit:${mobName} T:${MeleeGotHitLastTimer}
 	|/varset MeleeHitLastTimer ${MeleeTimeOutDuration}
-	/varset MeleeGotMissedLastTimer 10s
+	/if (${Target.CleanName.Equal[${mobName}]}) /varset MeleeHitLastTimer ${MeleeTimeOutDuration}
 /return
-
 sub Event_MobDeath(Line,mobName)
 	
 	/echo Mob:${mobName}
