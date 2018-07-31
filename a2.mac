@@ -688,7 +688,8 @@ Sub Combat
 	|Ldon Trap mob if we only have one aggro mob sit down and let it kill it self.
 	/call CheckXTarget
 	|/echo ${Macro.Return} && !${MeleeGotHitLastTimer} && ${MeleeGotMissedLastTimer}
-	/if (${Macro.Return}==1 && !${MeleeGotHitLastTimer} && ${MeleeGotMissedLastTimer}) {
+
+	/if (${Macro.Return}==1 && !${MeleeGotHitLastTimer} && ${MeleeGotMissedLastTimer} && ${Target.PctHPs}>=98 ) {
 		/echo Ldon DS kill..
 		/attack off
 		/combat off
@@ -697,7 +698,17 @@ Sub Combat
 		/delay 5
 		/delay 5s !${Target.ID} || ${Me.Standing}
 	}
-
+	|**
+	/if (${Macro.Return}==1 && !${MeleeGotHitLastTimer} && ${MeleeGotMissedLastTimer} && ${MeleeHitLastTimer}<=350 && !${Melee.Enrage}) {
+		/echo Ldon DS kill..
+		/attack off
+		/combat off
+		/stick off
+		/sit
+		/delay 5
+		/delay 5s !${Target.ID} || ${Me.Standing}
+	}
+**|
 	
 }
  
@@ -1468,14 +1479,14 @@ Sub dispell_with_ring
 
 sub Event_GotHit(Line,mobName)
 	|/echo HitMiss:${mobName}
-	/if (${Target.CleanName.Equal[${mobName}]}) /varset MeleeGotMissedLastTimer 10s
-	|/varset MeleeGotMissedLastTimer 10s
+	|/if (${Target.CleanName.Equal[${mobName}]}) /varset MeleeGotMissedLastTimer 10s
+	/varset MeleeGotMissedLastTimer 10s
 	|/echo GotMissed..
 /return
 
 sub Event_GotHitDmg(Line,mobName)
-	/echo GotHitDmg:${mobName} T:${MeleeGotHitLastTimer}
-	|/if (${Target.CleanName.Equal[${mobName}]}) /varset MeleeHitLastTimer ${MeleeTimeOutDuration}
+	|/echo GotHitDmg:${mobName} T:${MeleeGotHitLastTimer}
+	/if (${Target.CleanName.Equal[${mobName}]}) /varset MeleeHitLastTimer ${MeleeTimeOutDuration}
 	|/echo gotHitForDMG
 	/varset MeleeGotHitLastTimer 10s
 /return
