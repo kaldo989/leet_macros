@@ -11,7 +11,7 @@
 #event MobDeath "#*#You have slain #1#!"
 #Event GotHitDmg   "#1#YOU for#*#points of damage."
 #Event GotHit   "#1# tries to #*# YOU, but #*#" 
-
+#Event LockedObj "#*#You cannot open #1#,#*#"
 #event Hit "#*#YOU #*# #1# for #*# points of damage."
 |Hail after warp. Helps with resyncing after warp
 #define hailIt 1
@@ -554,7 +554,7 @@ sub Main
 /stand
 /if (${IsLdon} ) {
 	
-	/if (${SpawnCount[object box]}>0 || ${SpawnCount[object barrel]}>0) {
+	/if (${SpawnCount[object box]}>0 || ${SpawnCount[object barrel noalert 1]}>0 || ${SpawnCount[chest barrel noalert 1]}>0 ) {
 		/echo Killing object no mobs up!
 		/call KillObject
 		/goto :Waiting
@@ -577,20 +577,23 @@ sub Main
 
 Sub KillObject
 /declare tarID int local
-/if (${SpawnCount[object box]} && ${SpawnCount[object barrel]}) {
- /varset tarID ${If[${Math.Rand[2]},${Spawn[object box].ID},${Spawn[object barrel].ID}]}
+/if (${SpawnCount[object box noalert 1]} && ${SpawnCount[object barrel noalert 1]}) {
+ /varset tarID ${If[${Math.Rand[2]},${Spawn[object box noalert 1].ID},${Spawn[object barrel noalert 1].ID}]}
 } else {
-	/if (${SpawnCount[object box]}) /varset tarID ${Spawn[object box].ID}
-	/if (${SpawnCount[object barrel]}) /varset tarID ${Spawn[object barrel].ID}
+	/if (${SpawnCount[object box noalert 1]}) /varset tarID ${Spawn[object box noalert 1].ID}
+	/if (${SpawnCount[object barrel noalert 1]}) /varset tarID ${Spawn[object barrel noalert 1].ID}
+	/if (${SpawnCount[chest barrel noalert 1]}) /varset tarID ${Spawn[chest barrel noalert 1].ID}
 }
 
-/if (${tarID} && ${Spawn[${tarID}].Type.Equal[object]}) {
+/if (${tarID} && (${Spawn[${tarID}].Type.Equal[object]} || ${Spawn[${tarID}].Type.Equal[chest]})) {
 	/warp loc ${Spawn[${tarID}].Y} ${Spawn[${tarID}].X} ${Spawn[${tarID}].Z}
 	/delay 5
 	/target id ${tarID}
 	/delay 5
 	/open
 	/delay 5
+	/doevents
+	
 }
 /return
 
@@ -698,7 +701,23 @@ Sub Combat
 		/delay 5
 		/delay 5s !${Target.ID} || ${Me.Standing}
 	}
+
+	/if (${Macro.Return}>1 && !${MeleeGotHitLastTimer} && ${MeleeGotMissedLastTimer} && ${Target.PctHPs}>=99 ) {
+		| Change to another Target
+
+
+		
+		/for lx 1 to 13
+			/if ( ${Me.XTarget[${lx}].ID} > 0 && !${Spawn[id ${Me.XTarget[${lx}].ID}].Type.Equal[Untargetable]} && ${Spawn[id ${Me.XTarget[${lx}].ID}].Type.Equal[NPC]}) {
+				/if ( ${Target.ID}!= ${Me.XTarget[${lx}].ID}) {
+					/target id ${Me.XTarget[${x}].ID} 
+					/varset lx 14
+				}
+			}
+		/next lx
+	}
 	|**
+
 	/if (${Macro.Return}==1 && !${MeleeGotHitLastTimer} && ${MeleeGotMissedLastTimer} && ${MeleeHitLastTimer}<=350 && !${Melee.Enrage}) {
 		/echo Ldon DS kill..
 		/attack off
@@ -1475,6 +1494,11 @@ Sub dispell_with_ring
 		/if (${Me.Buff[Breath of Ultor].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
 		/if (${Me.Buff[Malicious Decay].Duration.Seconds}>0) /call cast "Ring of Slaughtering Cures" item
 	}
+/return
+
+sub Event_LockedObj(Line,objName)
+	/echo Hit LockedObj ${objName}
+	/if (${Target.CleanName.Equal[${objName}]}) /alert add 1  id ${Target.ID}
 /return
 
 sub Event_GotHit(Line,mobName)
