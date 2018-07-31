@@ -710,7 +710,7 @@ Sub Combat
 		/for lx 1 to 13
 			/if ( ${Me.XTarget[${lx}].ID} > 0 && !${Spawn[id ${Me.XTarget[${lx}].ID}].Type.Equal[Untargetable]} && ${Spawn[id ${Me.XTarget[${lx}].ID}].Type.Equal[NPC]}) {
 				/if ( ${Target.ID}!= ${Me.XTarget[${lx}].ID}) {
-					/target id ${Me.XTarget[${x}].ID} 
+					/target id ${Me.XTarget[${lx}].ID} 
 					/varset lx 14
 				}
 			}
