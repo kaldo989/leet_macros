@@ -2,6 +2,17 @@
 
 Sub Main
 
+/if (${Zone.ID}==151) {
+    /if (${Target.ID}!=${Spawn[Kamzar].ID} || ${Spawn[Kamzar].Distance}>7) {
+        /warp loc -2 -22 0
+        /delay 5
+        /target id ${Spawn[Kamzar].ID}
+        /delay 5
+        /click right target
+    }
+
+
+}
 /call SetupAdvLootVars
 
 /call DoLootStuff sell
