@@ -584,7 +584,7 @@ sub Main
 	/echo Starting Wait for respawn!
 	|/call WaitForInstanceSpawn
 	|/delay 10s
-	/beep
+	|/beep
 	
 	/call WaitForInstanceSpawn2
 	/echo Respawn DONE!
