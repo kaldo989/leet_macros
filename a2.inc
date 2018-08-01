@@ -107,7 +107,7 @@ Sub AddAlerts
 /alert add 4 npc "steadfast servant"
 
 
-/alert add 5 pc Eclin
+/alert add 5 pc ${Me.Name}
 
 
 

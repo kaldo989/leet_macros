@@ -410,7 +410,7 @@ Sub LootCorpse
  /if (${CorpseTries}>9) {
 	 /varset ALDontLoot ${Target.ID}
  	/squelch /alert add 25 id ${ALDontLoot}
-	 /echo Failed to loot 5 times ignoring...
+	 /echo Failed to loot 9 times ignoring...
 	/return
  }
  /if (${Target.ID}==${ALDontLoot} && ${Spawn[${ALDontLoot}].ID}) {
