@@ -1990,3 +1990,30 @@ Sub DrogaTierZoneIn
 		/notify ChatWindow CW_ChatOutput link ${DrogaInstanceLinks[${DrogaSelectedInstanceTier}]}
 	}
 /return
+
+Sub LdonCamp
+
+/if (${Zone.ID}==68) {
+	/warp loc -1085 -2484 -0.8
+	/face fast heading 304
+	/delay 5
+	/target Kroggl
+}
+
+/return
+
+Sub LdonEntrance
+|lfaydark 
+/if (${Zone.ID}==57) {
+	|ldon1 ... the old crypt in the South Western corner.
+	/warp loc -759 3836 1.22
+	/face fast heading 113
+	/look -50
+
+	|ldon1 ...
+	/warp loc -113 3879 -38.70
+	/face fast heading 180
+	/look -50
+}
+
+/return

@@ -44,7 +44,12 @@ sub Main
 
 |How long before mob is stuck? in seconds|
 
+/if (${Plugin[mq2netbots].Name.Length}>0) {
+	/if (!${NetBots.Enabled}) /netbots on
+	/if (!${NetBots.Listen}) /netbots grab=on
+	/if (!${NetBots.Output}) /netbots send=on
 
+}
 
  
  /declare pcRadiusAvoid int outer 30
@@ -360,7 +365,7 @@ sub Main
 
  /if (${Target.Distance}>30) {
 
- /warp t
+ /squelch /warp t
 
  /delay 2
 
@@ -430,6 +435,25 @@ sub Main
 
 /call Zonecheck
 
+| Override SAD targeting to assist group...
+
+/if (${Zone.ID}==403 || ${Zone.ID}==405 || ${Zone.ID}==406) {
+	|Ok we are in a sad Zone.
+	/if (${Plugin[mq2netbots].Name.Length}>0) {
+		/for lx 1 to ${Math.Calc[${NetBots.Client.Count[ ]}+1]}
+			/if (${NetBots[${NetBots.Client.Arg[${lx}, ]}].InZone}) {
+
+				/if (${Spawn[${NetBots[${NetBots.Client.Arg[${lx}, ]}].TargetID}].Name.Left[2].Equal[##]}) {
+					/echo ${NetBots.Client.Arg[${lx}, ]} has engaged a BOSS!!...
+					/varset npcID ${NetBots.Client.Arg[${lx}, ].TargetID}
+					/goto :KillMob
+				}
+	
+			}
+		
+		/next lx
+	}
+}
 
 
 /varset TargMin ${Math.Calc[${Me.Level}-${MinLVL}]}
@@ -455,7 +479,7 @@ sub Main
  }
  /varset FadeCount 0
 
- /warp succor
+ /squelch /warp succor
 
  /varset WaitTimer 3s
 
@@ -515,7 +539,7 @@ sub Main
 /if (${npcID}==0) /goto :startpoint
 
 /echo KillMob ${Spawn[id ${npcID}].CleanName} id:${npcID}
- /warp loc ${Math.Calc[${Spawn[id ${npcID}].Y}-3]} ${Math.Calc[${Spawn[id ${npcID}].X}-3]} ${Spawn[id ${npcID}].Z}
+ /squelch /warp loc ${Math.Calc[${Spawn[id ${npcID}].Y}-3]} ${Math.Calc[${Spawn[id ${npcID}].X}-3]} ${Spawn[id ${npcID}].Z}
  /delay 1s ${Spawn[id ${npcID}].Distance}<9
  /target id ${npcID} range ${TargMin} ${TargMax}
  /if ( hailIt) /hail
@@ -637,15 +661,15 @@ Sub FoundLdonEndBoss
 	/beep
 	/beep
 	/beep
-	/warp s
+	/squelch /warp s
 	/call PullLdonBoss ${Spawn[npc alert 33].ID}
 	
 /return
 
 Sub PullLdonBoss(bossID)
-/warp s 
+/squelch /warp s 
 /delay 5
-/warp s
+/squelch /warp s
 /declare xloc int local ${Me.X}
 /declare yloc int local ${Me.Y}
 /declare zloc int local ${Me.Z}
@@ -658,7 +682,7 @@ Sub PullLdonBoss(bossID)
 	/echo Valid Boss!
 } 
 
-/warp loc ${Spawn[${bossID}].Y} ${Spawn[${bossID}].X} ${Spawn[${bossID}].Z}
+/squelch /warp loc ${Spawn[${bossID}].Y} ${Spawn[${bossID}].X} ${Spawn[${bossID}].Z}
 /delay 3
 /target id ${bossID}
 /delay 1
@@ -688,8 +712,8 @@ Sub PullLdonBoss(bossID)
 /echo we have Boss Aggro!
 /attack off
 /stick off
-/warp s
-/warp s
+/squelch /warp s
+/squelch /warp s
 :waitForBoss
 /if (${Me.Pet.ID}) {
 	/pet leave
@@ -709,23 +733,15 @@ Sub HaveAggroOf(mobID)
 
 Sub WaitForInstanceSpawn2
 	/declare bailOutTimer timer local 25s
-	/declare mobcount2 int local ${SpawnCount[npc]}
+	
 	:dlyLoop
-	/if (${SpawnCount[npc]}> ${mobcount2} ) {
-		/varset mobcount2 ${SpawnCount[npc]}
-		/delay 5
-		/goto :dlyLoop
-	}
+	
 
-	/if (${mobcount2}>0) /call AverageLvlOfMobs
+	/call AverageLvlOfMobs
 
 	/if (${Macro.Return}>=${InstanceAvgLvl}) {
 		
-		/if ( ${InstanceAvgLvl} < ${Macro.Return}) {
-			/varset InstanceAvgLvl ${Macro.Return}
-			/delay 5
-			/goto :dlyLoop
-		}
+		
 		/return
 
 	}
@@ -735,14 +751,17 @@ Sub WaitForInstanceSpawn2
 
 /return
 
+
+
 Sub AverageLvlOfMobs
 	|/echo Avg.....
 	/declare tempSum float local
-
-	/for lx 1 to ${SpawnCount[npc]}
+	/declare count int local ${If[${SpawnCount[npc]}>30,30,${SpawnCount[npc]}]}
+	|/for lx 1 to ${SpawnCount[npc]}
+	/for lx 1 to ${count}
 		/varset tempSum ${Math.Calc[${tempSum}+${NearestSpawn[${lx},npc].Level}]}
 	/next lx
-/return ${Math.Calc[${tempSum}/${SpawnCount[npc]}]}
+/return ${Math.Calc[${tempSum}/${count}]}
 
 Sub KillObject
 /declare tarID int local
@@ -755,7 +774,7 @@ Sub KillObject
 }
 
 /if (${tarID} && (${Spawn[${tarID}].Type.Equal[object]} || ${Spawn[${tarID}].Type.Equal[chest]})) {
-	/warp loc ${Spawn[${tarID}].Y} ${Spawn[${tarID}].X} ${Spawn[${tarID}].Z}
+	/squelch /warp loc ${Spawn[${tarID}].Y} ${Spawn[${tarID}].X} ${Spawn[${tarID}].Z}
 	/delay 5
 	/target id ${tarID}
 	/delay 5
@@ -873,6 +892,30 @@ Sub Combat
 		/delay 5s !${Target.ID} || ${Me.Standing}
 	}
 
+	/if (${Macro.Return}==1 && ${Target.ID}>0 &&${Target.CleanName.Length}==0 ) {
+		/for lx 1 to 13
+			/if (${Me.XTarget[${lx}].ID}==${Target.ID}) {
+				/echo Ldon DS1 kill..
+				/attack off
+				/combat off
+				/stick off
+				/sit
+				/delay 5
+				/delay 5s !${Target.ID} || ${Me.Standing}
+			}
+		/next lx
+	}
+
+	/if (${Macro.Return}>1 &&  ${Target.ID}>0 && ${Target.CleanName.Length}==0) {
+		/for lx 1 to 13
+			/if ( ${Me.XTarget[${lx}].ID} > 0 && !${Spawn[id ${Me.XTarget[${lx}].ID}].Type.Equal[Untargetable]} && ${Spawn[id ${Me.XTarget[${lx}].ID}].Type.Equal[NPC]}) {
+				/if ( ${Target.ID}!= ${Me.XTarget[${lx}].ID}) {
+					/target id ${Me.XTarget[${lx}].ID} 
+					/varset lx 14
+				}
+			}
+		/next lx
+	}
 	/if (${Macro.Return}>1 && !${MeleeGotHitLastTimer} && ${MeleeGotMissedLastTimer} && ${Target.PctHPs}>=99 ) {
 		| Change to another Target
 
@@ -905,7 +948,7 @@ Sub Combat
 
  /if (${Target.Distance}>50) {
 
- /warp target
+ /squelch /warp target
 
  }
 
@@ -918,7 +961,7 @@ Sub Combat
 }
  /if (${Target.ID} && !${Target.LineOfSight}) {
 
- /warp target
+ /squelch /warp target
 
  /delay 5
 
@@ -1096,7 +1139,7 @@ Sub Combat
 	/stick off
 	/melee off
 	/stick off
-	/warp s
+	/squelch /warp s
 	/delay 1s
 	/endm
  } 
@@ -1191,7 +1234,7 @@ Sub Zonecheck
 /call CheckGroupLevel
 
 /if (${Macro.Return}) {
-	/warp s
+	/squelch /warp s
 	/delay 1s
 	/alt on 100
 	/delay 1s
@@ -1217,7 +1260,7 @@ Sub Zonecheck
 	/call ZoneCOM
 	
 	/delay 2s
-	/warp wp safe
+	/squelch /warp wp safe
 	/varcalc DeathCounter ${Math.Calc[${DeathCounter}+1]}
 	|/timed 30s /macro a2 ${DoLoot} ${MaxRad} named
 	|/goto :startpoint
@@ -1442,7 +1485,7 @@ Sub Warren
 
  /delay 5
 
- /warp t
+ /squelch /warp t
 
  /delay 2s
 
@@ -1731,7 +1774,7 @@ sub Event_TargetOoR
 		
 		/if ( ${currAggoCount} == ${lastTarget}) {
 			/target id ${Me.XTarget[${x}].ID} 
-			/warp loc ${Math.Calc[${Target.Y}+2]} ${Math.Calc[${Target.X}+2]} ${Math.Calc[${Target.Z}+2]} 
+			/squelch /warp loc ${Math.Calc[${Target.Y}+2]} ${Math.Calc[${Target.X}+2]} ${Math.Calc[${Target.Z}+2]} 
 			/varset OoRRetargetTimer 1s
 			/return
 		}
@@ -1741,7 +1784,7 @@ sub Event_TargetOoR
 			/if ( ${Me.XTarget[${x}].ID} > 0 && !${Spawn[id ${Me.XTarget[${x}].ID}].Type.Equal[Untargetable]} && ${Spawn[id ${Me.XTarget[${x}].ID}].Type.Equal[NPC]}) {
 				/if ( ${x}>${lastTarget}) {
 					/target id ${Me.XTarget[${x}].ID} 
-					/warp loc ${Math.Calc[${Target.Y}+2]} ${Math.Calc[${Target.X}+2]} ${Math.Calc[${Target.Z}+2]} 
+					/squelch /warp loc ${Math.Calc[${Target.Y}+2]} ${Math.Calc[${Target.X}+2]} ${Math.Calc[${Target.Z}+2]} 
 					/varset OoRRetargetTimer 1s
 					/return
 				}
