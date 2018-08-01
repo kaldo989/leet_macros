@@ -81,7 +81,23 @@ sub Main
 	 /echo In LDON!
 	 /declare LdonBoss string outer ${Ini[a2.ini,Ldons,Bosses]}
 	 
-	 
+	 /alert clear 33
+	 /alert add 33 npc first of
+	 /alert add 33 npc second of
+	 /alert add 33 npc third of
+	 /alert add 33 npc fourth of
+	 /alert add 33 npc fifth of
+	 /alert add 33 npc sixth of 
+	 /alert add 33 npc seventh of
+	 /alert add 33 npc eighth of
+	 /alert add 33 npc ninth of
+	 /alert add 33 npc tenth of
+	 /alert add 33 npc eleventh of
+	 /alert add 33 npc twelfth of
+	 /alert add 33 npc thirteenth of
+	 /alert add 33 npc fourteenth of
+	 /alert add 33 npc fifteenth of
+	
  }
  /declare ReclaimInvOpenOnce int outer 0
 |How many levels below or above you want to kill|
@@ -579,7 +595,7 @@ sub Main
 }
 
 /if (${InstanceReSpawning}) {
-	
+	/echo Instance respawn #${InstanceNumResets} AvgMobLevel:${InstanceAvgLvl} MaxNumMobs:${InstanceMaxMobCount}
 	/varset InstanceReSpawning 0
 	/echo Starting Wait for respawn!
 	|/call WaitForInstanceSpawn
@@ -588,19 +604,16 @@ sub Main
 	
 	/call WaitForInstanceSpawn2
 	/echo Respawn DONE!
-	
+	|**
 	/for lx 1 to ${npc noalert 1}
 		/if (${LdonBoss.Find[/${NearestSpawn[${lx},npc noalert 1].CleanName}/]}) {
-			/echo Ldon SuperBoss!! ..: ${NearestSpawn[${lx},npc noalert 1].CleanName} :..
-			/beep
-			/beep
-			/beep
-			/warp s
-			/endm
-			/varset lx 10000
-			/goto :startpoint
+			
 		}
 	/next lx
+	**|
+	/if (${IsLdon} && ${SpawnCount[npc alert 33]}>0) {
+		/call FoundLdonEndBoss
+	} 
 	/goto :startpoint
 }
 
@@ -618,6 +631,81 @@ sub Main
 
 
 /return
+
+Sub FoundLdonEndBoss
+	/echo Ldon SuperBoss!! ..: ${Spawn[npc alert 33].CleanName} :..
+	/beep
+	/beep
+	/beep
+	/warp s
+	/call PullLdonBoss ${Spawn[npc alert 33].ID}
+	
+/return
+
+Sub PullLdonBoss(bossID)
+/warp s 
+/delay 5
+/warp s
+/declare xloc int local ${Me.X}
+/declare yloc int local ${Me.Y}
+/declare zloc int local ${Me.Z}
+/declare petItem string local ${FindItem[godly companions]}
+/declare petTimer timer local 0
+
+/if (${petItem.Length}>0) /echo PetItem: ${petItem}
+|first check valid boss
+/if (${LdonBoss.Find[/${Spawn[${bossID}].CleanName}/]}) {
+	/echo Valid Boss!
+} 
+
+/warp loc ${Spawn[${bossID}].Y} ${Spawn[${bossID}].X} ${Spawn[${bossID}].Z}
+/delay 3
+/target id ${bossID}
+/delay 1
+/call HaveAggroOf ${bossID}
+
+
+:AggroLoop 
+	/if (!${Me.Combat}) {
+		/attack on
+		/stick 5 moveback
+	}
+	/if (${Target.ID}!= ${bossID}) /target id ${bossID}
+	/if (${petItem.Length}>0 && !${Me.Pet.ID} && !${petTimer} ) {
+		/call ClickItem "${petItem}"
+		/varset petTimer 1s
+	}
+
+	/if (${Me.Pet.ID} && !${petTimer}) {
+		/pet attack
+		/varset petTimer 1s
+	}
+	/call HaveAggroOf ${bossID}
+
+
+/if (!${Macro.Return}) /goto :AggroLoop
+
+/echo we have Boss Aggro!
+/attack off
+/stick off
+/warp s
+/warp s
+:waitForBoss
+/if (${Me.Pet.ID}) {
+	/pet leave
+	/delay 5
+}
+
+/if (${Spawn[${bossID}].Distance}>20) /goto :waitForBoss
+/echo Boss is here
+/return
+
+Sub HaveAggroOf(mobID)
+
+/for lx 1 to 13
+	/if (${Me.XTarget[${lx}].ID}==${mobID}) /return TRUE
+/next lx
+/return FALSE
 
 Sub WaitForInstanceSpawn2
 	/declare bailOutTimer timer local 25s
@@ -686,12 +774,14 @@ Sub Combat
  
  :kill_outer
 
-
+/if (${IsLdon} && ${SpawnCount[npc alert 33]}>0) {
+		/call FoundLdonEndBoss
+} 
  
  /call Zonecheck
 
  /doevents
-
+	
  /if (${Corpse.Open}) {
 	 /nomodkey /notify LootWnd LW_DoneButton leftmouseup
 
@@ -874,7 +964,7 @@ Sub Combat
 	/delay 2
 
  }
-/if (${Me.Class.ShortName.Equal[MNK]} && !${EpicTimer} && ${Cast.Ready[The  Sepukku]}) {
+/if (${Me.Class.ShortName.Equal[MNK]} && !${EpicTimer} && !${Melee.DiscID} && ${Cast.Ready[The  Sepukku]}) {
 	/delay 2
 	|/itemnotify ${FindItem[The  Sepukku].InvSlot} rightmouseup
 	|/itemnotify mainhand rightmouseup
@@ -925,7 +1015,7 @@ Sub Combat
 	/delay 5
 
 	|/itemnotify mainhand rightmouseup
-	/call ClickItem "Spirit of Vesagran"
+	/call ClickItem "Colada"
 	/varset EpicTimer 50s
 
 	/delay 2
@@ -1587,6 +1677,7 @@ Sub Event_LdonReset(Line)
 	/varset InstanceNumResets ${Math.Calc[${InstanceNumResets}+1]}
 	/varset InstanceReSpawning 1
 	
+	/popup Instance respawn #${InstanceNumResets} AvgMobLevel:${InstanceAvgLvl} MaxNumMobs:${InstanceMaxMobCount}
 /return
 
 Sub Event_LdonCountMob(Line,numMob)
