@@ -25,17 +25,18 @@
 #define FreeInventorySlots 7
 
 |CombatArc is used to calculate arc to keep mobs in. Value is doubled ex. 45 results in a 90deg arc
-#define CombatArc 45
+#define CombatHalfArc 45
 
 
 sub Main
 /declare lx int outer 
-/if (${Ini[a2.ini,a2].Length}==0) /call CreateIni
+/if (${Ini[a2.ini,a2,Version].Length}==0) /call CreateIni
 
 /if (!${Plugin[mq2cast].Name.Length}) /plugin mq2cast
  /call SetupAdvLootVars
 
  /call AddAlerts
+ 
 /echo a2
  |Pet heal
  
@@ -77,7 +78,7 @@ sub Main
  /declare InstanceNumResets int outer 0
  /declare InstanceCurrentMobCount int outer 0
  /declare InstanceMaxMobCount int outer 0
-
+ /declare InstanceNumKills int outer 0
  /declare InstanceAvgLvl float outer 0
 
  /call CheckLdon
@@ -102,6 +103,20 @@ sub Main
 	 /alert add 33 npc thirteenth of
 	 /alert add 33 npc fourteenth of
 	 /alert add 33 npc fifteenth of
+
+	 |a2.ini a2 ${Me.Name} ${Me.ID}|${Zone.ID}|${InstanceAvgLvl}|${InstanceCurrentMobCount}|${InstanceMaxMobCount}|${InstanceNumKills}|${InstanceNumResets}
+	 /declare tempINI string local ${Ini[a2.ini,a2,${Me.Name}]}
+	 /if (${tempINI.Arg[1,|].Equal[${Me.ID}]} && ${tempINI.Arg[2,|].Equal[${Zone.ID}]}) {
+		 /echo Reloading Instance Variables
+		 /varset InstanceAvgLvl ${tempINI.Arg[3,|]}
+		 /varset InstanceCurrentMobCount ${tempINI.Arg[4,|]}
+		 /varset InstanceMaxMobCount ${tempINI.Arg[5,|]}
+		 /varset InstanceNumKills ${tempINI.Arg[6,|]}
+		 /varset InstanceNumResets ${tempINI.Arg[7,|]}
+
+		 /echo AvgLvl:${InstanceAvgLvl} NumKills:${InstanceNumKills} NumReset:${InstanceNumResets}
+		 
+	 }
 	
  }
  /declare ReclaimInvOpenOnce int outer 0
@@ -615,6 +630,12 @@ sub Main
 		/goto :Waiting
 	}
 
+	/if (${Me.Name.Equal[Eclin]} && ${SpawnCount[npc Killer Wasp]}>0) {
+
+		/call WriteLdonStat "Zone:${Zone.ShortName} NumRespawns:${InstanceNumResets} AvgLvl:${InstanceAvgLvl} NumMobs:${InstanceMaxMobCount} Kills:${InstanceNumKills}"
+		/call SummonGearPet
+		/endm
+	}
 	
 }
 
@@ -622,19 +643,11 @@ sub Main
 	/echo Instance respawn #${InstanceNumResets} AvgMobLevel:${InstanceAvgLvl} MaxNumMobs:${InstanceMaxMobCount}
 	/varset InstanceReSpawning 0
 	/echo Starting Wait for respawn!
-	|/call WaitForInstanceSpawn
-	|/delay 10s
-	|/beep
+	
 	
 	/call WaitForInstanceSpawn2
 	/echo Respawn DONE!
-	|**
-	/for lx 1 to ${npc noalert 1}
-		/if (${LdonBoss.Find[/${NearestSpawn[${lx},npc noalert 1].CleanName}/]}) {
-			
-		}
-	/next lx
-	**|
+	
 	/if (${IsLdon} && ${SpawnCount[npc alert 33]}>0) {
 		/call FoundLdonEndBoss
 	} 
@@ -667,6 +680,7 @@ Sub FoundLdonEndBoss
 /return
 
 Sub PullLdonBoss(bossID)
+/if (${Me.Pet.ID}) /pet leave
 /squelch /warp s 
 /delay 5
 /squelch /warp s
@@ -722,6 +736,9 @@ Sub PullLdonBoss(bossID)
 
 /if (${Spawn[${bossID}].Distance}>20) /goto :waitForBoss
 /echo Boss is here
+ /varset MeleeHitLastTimer ${MeleeTimeOutDuration}
+ /varset MeleeGotHitLastTimer 10s
+ /varset MeleeGotMissedLastTimer 10s
 /return
 
 Sub HaveAggroOf(mobID)
@@ -732,16 +749,17 @@ Sub HaveAggroOf(mobID)
 /return FALSE
 
 Sub WaitForInstanceSpawn2
-	/declare bailOutTimer timer local 25s
+	/declare bailOutTimer timer local 30s
 	
 	:dlyLoop
 	
+	 
 
 	/call AverageLvlOfMobs
 
-	/if (${Macro.Return}>=${InstanceAvgLvl}) {
+	/if ( ${SpawnCount[npc]} > 40 && ${Macro.Return}>=${Math.Calc[${InstanceAvgLvl}-10]}) {
 		
-		
+		/varset InstanceAvgLvl 0
 		/return
 
 	}
@@ -756,7 +774,7 @@ Sub WaitForInstanceSpawn2
 Sub AverageLvlOfMobs
 	|/echo Avg.....
 	/declare tempSum float local
-	/declare count int local ${If[${SpawnCount[npc]}>30,30,${SpawnCount[npc]}]}
+	/declare count int local ${If[${SpawnCount[npc]}>60,60,${SpawnCount[npc]}]}
 	|/for lx 1 to ${SpawnCount[npc]}
 	/for lx 1 to ${count}
 		/varset tempSum ${Math.Calc[${tempSum}+${NearestSpawn[${lx},npc].Level}]}
@@ -885,19 +903,19 @@ Sub Combat
 	/if (${Macro.Return}==1 && !${MeleeGotHitLastTimer} && ${MeleeGotMissedLastTimer} && ${Target.PctHPs}>=98 ) {
 		/echo Ldon DS kill..
 		/attack off
-		/combat off
+		
 		/stick off
 		/sit
 		/delay 5
 		/delay 5s !${Target.ID} || ${Me.Standing}
 	}
 
-	/if (${Macro.Return}==1 && ${Target.ID}>0 &&${Target.CleanName.Length}==0 ) {
-		/for lx 1 to 13
+	/if (${Macro.Return}==1 && ${Target.ID}>0 && ${Target.CleanName.Length}==0 && ${Me.Combat}) {
+		/for lx 1 to 3
 			/if (${Me.XTarget[${lx}].ID}==${Target.ID}) {
 				/echo Ldon DS1 kill..
 				/attack off
-				/combat off
+				
 				/stick off
 				/sit
 				/delay 5
@@ -1714,13 +1732,14 @@ Sub dispell_with_ring
 Sub Event_GainSoloExp
 	/varset MeleeGotHitLastTimer 10s
 	/varset MeleeGotMissedLastTimer 10s
+	/varset InstanceNumKills ${Math.Calc[${InstanceNumKills}+1]}
 /return
 
 Sub Event_LdonReset(Line)
 	/varset InstanceNumResets ${Math.Calc[${InstanceNumResets}+1]}
 	/varset InstanceReSpawning 1
 	
-	/popup Instance respawn #${InstanceNumResets} AvgMobLevel:${InstanceAvgLvl} MaxNumMobs:${InstanceMaxMobCount}
+	/popup Instance respawn #${InstanceNumResets} AvgMobLevel:${InstanceAvgLvl} MaxNumMobs:${InstanceMaxMobCount} Kills:${InstanceNumKills}
 /return
 
 Sub Event_LdonCountMob(Line,numMob)
@@ -1729,6 +1748,7 @@ Sub Event_LdonCountMob(Line,numMob)
 	/if (${InstanceAvgLvl}==0) {
 	 /call AverageLvlOfMobs
 	 /varset InstanceAvgLvl ${Macro.Return}
+	 /echo Avg Set to:${InstanceAvgLvl}
 	}
 /return
 
@@ -1968,4 +1988,50 @@ Sub ClickItem(itemToClick)
 /echo Clicking ${itemToClick}
 /itemnotify ${FindItem[=${itemToClick}].InvSlot} rightmouseup
 /delay 5
+/return
+
+Sub WriteLdonStat(inString)
+	/declare x1 int local
+	/for x1 1 to 100
+		/if (${Ini[a2LdonStat.ini,Boss,Boss${x1}].Length}==0) {
+			/ini a2LdonStat.ini Boss Boss${x1} "${inString}"
+			/return
+		}
+	/next x1
+/return
+
+:OnExit
+/echo Ending A2.mac
+/if (${IsLdon} && ${SpawnCount[npc Killer Wasp]}==0) {
+	/ini a2.ini a2 ${Me.Name} ${Me.ID}|${Zone.ID}|${InstanceAvgLvl}|${InstanceCurrentMobCount}|${InstanceMaxMobCount}|${InstanceNumKills}|${InstanceNumResets}
+}  
+/return
+
+Sub SummonGearPet
+
+	/declare petItem string local ${FindItem[godly companions]}
+
+	
+	/if (!${Me.Pet.ID}) {
+		/if (${petItem.Length}==0) {
+			/echo Only works with the Godly Pet!
+			/return
+		}
+		:petloop
+		/call ClickItem "${petItem}"
+		/delay 2s ${Me.Pet.ID}
+	}
+	/if (${Me.Pet.ID} ) {
+	
+	/target id ${Me.Pet.ID}
+	/delay 1s
+	/squelch /notify ChatWindow CW_ChatOutput link B758F00000000000000000000000000000000000000000000000000
+	/delay 5
+	/squelch /notify ChatWindow CW_ChatOutput link B757E00000000000000000000000000000000000000000000000000
+	/delay 5
+	/squelch /notify ChatWindow CW_ChatOutput link B757E00000000000000000000000000000000000000000000000000
+	/delay 5
+	/squelch /notify ChatWindow CW_ChatOutput link B758A00000000000000000000000000000000000000000000000000
+	/delay 5
+	}
 /return

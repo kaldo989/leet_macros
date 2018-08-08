@@ -1541,7 +1541,7 @@ Sub ZoneSAD
 
 /varset sadcount 0
 
-/mac a2 900000 soi dein win
+/mac a2 1 900000 soi dein win
 
 /return
 
@@ -1984,12 +1984,14 @@ Sub DrogaChoose
 /return
 
 Sub DrogaTierZoneIn
+	
 	/if (!${Defined[DrogaSelectedInstanceTier]}) {
 		/notify ChatWindow CW_ChatOutput link ${DrogaInstanceLinks[${DrogaInstanceTier}]}
 	} else {
 		/notify ChatWindow CW_ChatOutput link ${DrogaInstanceLinks[${DrogaSelectedInstanceTier}]}
 	}
 /return
+
 
 Sub LdonCamp
 
@@ -2000,6 +2002,21 @@ Sub LdonCamp
 	/target Kroggl
 }
 
+|East Commons
+/if (${Zone.ID}==22) {
+	/warp loc -1655 -162 2.5
+	/face fast heading 267
+	/delay 5
+	/target Uzmanya
+}
+
+|North Ro
+/if (${Zone.ID}==34) {
+	/warp loc 2665 908 -26
+	/face fast heading 228
+	/delay 5
+	/target Efrelle
+}
 /return
 
 Sub LdonEntrance
@@ -2014,6 +2031,20 @@ Sub LdonEntrance
 	/warp loc -113 3879 -38.70
 	/face fast heading 180
 	/look -50
+}
+
+|south ro
+/if(${Zone.ID}==35) {
+	/warp loc -2113 1346 -82
+	/face fast heading 0
+	/look 0
+}
+
+|North ro
+/if(${Zone.ID}==34) {
+	/warp loc -954 123 -62
+	/face fast heading 224
+	/look -100
 }
 
 /return

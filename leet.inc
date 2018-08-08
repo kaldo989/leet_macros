@@ -89,7 +89,7 @@ Sub GetTargetFromXTarget
 
 Sub Event_UbaidKills(Line, numkills)
 
-/echo Line:${Line} kills:${numkills}
+/echo kills:${numkills}
 
 /ini Leet.ini Ubaid NumKills ${numkills}
 /ini Leet.ini Ubaid LastTimer ${Time.Date} ${Time.Time24}
