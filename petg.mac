@@ -6,6 +6,18 @@
 |/notify ChatWindow CW_ChatOutput link B88AF00000000000000000000000000000000000000000000000000
 sub main
 
+/declare petItem string local ${FindItem[godly companions]}
+
+	
+	/if (!${Me.Pet.ID}) {
+		/if (${petItem.Length}==0) {
+			/echo Only works with the Godly Pet!
+			/return
+		}
+		:petloop
+		/call ClickItem "${petItem}"
+		/delay 2s ${Me.Pet.ID}
+	}
 /if (${Me.Pet.ID} ) {
 /target id ${Me.Pet.ID}
 /delay 5
@@ -18,4 +30,56 @@ sub main
 /squelch /notify ChatWindow CW_ChatOutput link B758A00000000000000000000000000000000000000000000000000
 /delay 5
 }
+/return
+
+Sub ClickItem(itemToClick)
+/declare lx int local
+|**
+/if (${FindItemCount[=${itemToClick}]}==0 || ${Me.Stunned} || ${Me.Casting.ID} || ${FindItem[=${itemToClick}].TimerReady} || !${Cast.Ready[${itemToClick}]}) {
+	|/echo ClickItem failed first check when clicking ${itemToClick}
+	/return
+}
+**|
+/if (${FindItemCount[=${itemToClick}]}==0) {
+	/echo ClickItem .. missing ${itemToClick}
+	/return
+}
+
+/if (!${Me.Standing}) /return
+/if (${Me.Stunned}) {
+	/echo ClickItem Stunned! ${itemToClick}
+	/return
+}
+
+/if (${Me.Casting.ID}) {
+	/echo CastItem already casting. ${itemToClick}
+	/return
+}
+
+/if (${FindItem[=${itemToClick}].TimerReady}) {
+	/echo ClickItem Cooldown ${FindItem[=${itemToClick}].TimerReady} on ${itemToClick}
+	/return
+}
+
+/if (!${Cast.Ready[${itemToClick}]}) {
+	/echo ClickItem Cast not ready! ${itemToClick}
+}
+/declare rightClass int local 0
+
+/for lx 1 to ${FindItem[=${itemToClick}].Classes}
+	/if (${FindItem[=${itemToClick}].Class[${lx}].ShortName.Equal[${Me.Class.ShortName}]}) /varset rightClass 1
+/next lx
+
+/if (${rightClass}==0) {
+	/echo ClickItem failed classcheck when clicking ${itemToClick}
+	/return
+}
+
+/if (${FindItem[=${itemToClick}].InvSlot}==0) {
+	/echo ClickItem Failed to click ${itemToClick} InvSlot=NULL
+	/return
+}
+/echo Clicking ${itemToClick}
+/itemnotify ${FindItem[=${itemToClick}].InvSlot} rightmouseup
+/delay 5
 /return
