@@ -1,0 +1,586 @@
+|/notify pack7 Container_Combine leftmouseup
+|/itemnotify in pack7 9 leftmouseup
+|/ctrl /itemnotify ${FindItemBankCount[xxx].InvSlot} leftmouseup
+|/keypress CMD_TOGGLE_BANK_BAGS
+|/keypress ${Window[Bank1].Open}
+#Event done "#*# whispers, 'You're either giving me an incorrect item, or you do not have enough money for this transaction.'"
+#Event cancelled "#*# has cancelled the trade."
+Sub Main
+
+	/declare leetball string outer
+	/declare augtrader string outer
+	/declare backspace int outer
+	/declare MerchantName string outer Jilsuia Lluarea
+	/declare collectbag string outer
+	/declare sunderbag string outer
+	/declare direbag string outer
+	/declare ashbag string outer
+	/declare sunderock int outer
+	/declare ashengate int outer
+	/declare direwind int outer
+	
+	/if (${Me.Platinum} < 205000000) /call getplat
+	
+	:mainloop
+	
+	
+	/if (${Cursor.ID}) {
+	
+		/keypress OPEN_INV_BAGS
+	
+		/if ((${Cursor.ID} >= 170001) && (${Cursor.ID} <= 170100)) /call diamond
+		/if ((${Cursor.ID} >= 170201) && (${Cursor.ID} <= 170300)) /call platinum
+		/if ((${Cursor.ID} >= 170401) && (${Cursor.ID} <= 170500)) /call titanium
+		/if ((${Cursor.ID} >= 170601) && (${Cursor.ID} <= 170700)) /call plutonium
+		/if ((${Cursor.ID} >= 170801) && (${Cursor.ID} <= 170900)) /call antimatter
+	} else {
+		/call getleetball
+		}
+		
+	/if (${Cursor.ID} != 170900) /goto :mainloop
+	
+/return
+
+sub diamond
+
+	/target domalisar
+	/delay 2
+		/if (${Target.Distance} > 10) {
+			/warp t
+			/delay 3
+		}
+	:diamondstart	
+		/if (${Cursor.ID} != 170100) {
+			/varset leetball ${Cursor.Name}
+			/click left target
+			/delay 5
+			/notify GiveWnd GVW_Give_Button leftmouseup
+			/delay 5
+			/doevents
+			/goto :diamondstart	
+		} else {
+		/call augtrade
+		}
+
+/return
+
+sub platinum
+
+	/target Eddard
+	/delay 2
+		/if (${Target.Distance} > 10) {
+			/warp t
+			/delay 3
+		}
+	:platinumstart
+		/if (${Cursor.ID} != 170300) {
+			/varset leetball ${Cursor.Name}
+			/click left target
+			/delay 5
+			/notify GiveWnd GVW_Give_Button leftmouseup
+			/delay 5
+			/doevents
+			/goto :platinumstart
+		} else {
+		/call augtrade
+	}
+
+/return
+
+sub titanium
+
+	/target inch high
+	/delay 2
+		/if (${Target.Distance} > 10) {
+			/warp t
+			/delay 3
+		}
+	:titaniumstart
+		/if (${Cursor.ID} != 170500) {
+			/varset leetball ${Cursor.Name}
+			/click left target
+			/delay 5
+			/notify GiveWnd GVW_Give_Button leftmouseup
+			/delay 5
+			/doevents
+			/goto :titaniumstart
+		} else {
+		/call augtrade
+	}
+
+/return
+
+sub plutonium
+
+	/target eryke
+	/delay 2
+		/if (${Target.Distance} > 10) {
+			/warp t
+			/delay 3
+		}
+	:plutoniumstart
+		/if (${Cursor.ID} != 170700) {
+			/varset leetball ${Cursor.Name}
+			/click left target
+			/delay 5
+			/notify GiveWnd GVW_Give_Button leftmouseup
+			/delay 5
+			/doevents
+			/goto :plutoniumstart
+		} else {
+		/call augtrade
+	}
+
+/return
+
+sub antimatter
+
+	/target alonzo
+	/delay 2
+		/if (${Target.Distance} > 10) {
+			/warp t
+			/delay 3
+		}
+	:antimatterstart
+		/if (${Cursor.ID} != 170900) {
+			/varset leetball ${Cursor.Name}
+			/click left target
+			/delay 5
+			/notify GiveWnd GVW_Give_Button leftmouseup
+			/delay 5
+			/doevents
+			/goto :antimatterstart
+		} else {
+			/delay 5
+			/autoi
+			/call getcompoundore
+	}
+		
+/return
+
+|==================================================================|
+| This event is called to trade your leet ball in for the next one |
+|==================================================================|
+
+sub augtrade
+
+	/target hukis
+		/if (${Target.Distance} > 10) {
+			/warp t
+			/delay 5
+		}
+		/click left target
+		/delay 1s
+		/notify GiveWnd GVW_Give_Button leftmouseup
+		/delay 2s
+
+/return
+
+|======================================================|
+| This event triggers if you dont have enough platinum |
+|======================================================|
+
+Sub Event_done
+
+	/echo You appear to be out of platinum!!
+	/end
+	
+/return
+
+|==================================================|
+| This event triggers if your turn in is cancelled |
+|==================================================|
+
+Sub Event_cancelled
+
+	/delay 5
+	/itemnotify pack8 leftmouseup
+	/delay 2
+	
+/return
+
+|======================================================================================================|
+| Target the nearest banker, warp to him, open up the bank window and get 9 compound ore's of leetness |
+|======================================================================================================|
+
+sub getcompoundore
+
+	/declare bankbag string
+	/declare compound int local
+
+	/if (${FindItemCount[Compound Ore of Leetness]} < 9) {
+		/target ${NearestSpawn[Banker]}
+		/delay 5 ${Target.ID}
+		/if (${Target.Distance} > 10) {
+			/warp target
+			/delay 2 ${Target.Distance} <= 10
+		}
+		/click right target
+		/delay 2
+		
+		/if (${FindItemBankCount[Compound Ore of Leetness]} >= 9) {
+
+			|**
+			/varset bankbag ${FindItemBank[Compound Ore of Leetness].InvSlot.Pack.Name}
+		
+			/delay 7
+			
+			/itemnotify ${bankbag} rightmouseup
+			**|
+			/call OpenBankBag "Compound Ore of Leetness"
+			/delay 5
+			
+			:getore
+			
+			/for compound 1 to 9
+				/ctrlkey /itemnotify ${FindItemBank[Compound Ore of Leetness].InvSlot} leftmouseup
+				/delay 5
+				/autoi
+			/next compound
+				
+			/delay 3
+			
+			/if (${FindItemBankCount[Compound Ore of Leetness]} >= 9) {
+				/if (${Cursor.ID}) /autoi
+				/delay 2
+				/call compound
+			} else {
+				/goto :getore
+				}
+		} else {
+			/call makecompoundore
+			}
+	}
+	
+	/if (${FindItemCount[Compound Ore of Leetness]} >= 9) /call compound
+		
+/return
+
+|===========================================|
+| Combine Compound ores and antimatter ball |
+|===========================================|
+
+sub compound
+
+	/declare compoundore int local
+	
+	
+	/if ((${FindItemCount[Compound Ore of Leetness]} >= 9) && (${FindItemCount[Leet ball of Antimatter Level 100]} >= 1)) {
+	
+		|** 
+		Buys the collection bag from Jilsuiaif if you dont have one.
+		**|
+		
+		/if (${FindItemCount[Collection Bag]} < 1) {
+		
+			/target ${MerchantName}
+
+				/if (${Target.Distance} > 10) {
+					/warp target
+					/delay 2
+					/stick 7 moveback
+					/face fast nolook
+					}
+
+			/delay 1s
+			/click right target
+			/delay 1s
+
+			/nomodkey /notify NewPointMerchantWnd NewPointMerchant_ItemList listselect ${Window[NewPointMerchantWnd].Child[NewPointMerchant_ItemList].List[${String[Collection Bag]},1]}
+			/delay 7
+			/nomodkey /notify NewPointMerchantWnd NewPointMerchant_PurchaseButton leftmouseup
+			/delay 7
+			/nomodkey /notify NewPointMerchantWnd NewPointMerchant_DoneButton leftmouseup
+			
+			/if (${Cursor.ID}) {
+				/itemnotify pack8 leftmouseup
+				/delay 7
+				/if (${Cursor.ID}) /autoinventory
+			}
+		}
+		
+		/delay 10
+		
+		|/varset collectbag ${FindItem[Collection Bag].InvSlot.Name}
+		/call FindPack "Collection Bag"
+		/varset collectbag ${Macro.Return}
+		/keypress OPEN_INV_BAGS
+		
+		/delay 1s
+
+		/for compoundore 1 to 9
+			/ctrlkey /itemnotify ${FindItem[Compound Ore of Leetness].InvSlot} leftmouseup
+			/delay 7
+			/itemnotify in ${collectbag} ${compoundore} leftmouseup
+			/delay 7
+		/next compoundore
+		
+		/itemnotify ${FindItem[Leet ball of Antimatter Level 100].InvSlot} leftmouseup
+		/delay 7
+		/itemnotify in ${collectbag} 10 leftmouseup
+		
+		/nomodkey /notify ContainerWindow Container_Combine leftmouseup
+		/delay 2s
+		/autoinventory
+		/delay 10
+		/keypress CLOSE_INV_BAGS
+		/end
+		
+	}
+		
+/return
+
+|=========================================================================================|
+| Warps to the nearest banker and gets the ores needed to make compound ore's of leetness |
+|=========================================================================================|
+
+sub makecompoundore
+
+	/declare s int local
+	/declare d int local
+	/declare ash int local
+
+	/if (${Cursor.ID}) /autoi
+	:getmoreore
+	/target ${NearestSpawn[Banker]}
+	/delay 5 ${Target.ID}
+	/if (${Target.Distance} > 10) {
+		/warp target
+		/delay 2 ${Target.Distance} <= 10
+	}
+	/click right target
+	/delay 2
+		
+	/if (${FindItemBankCount[Sunderock Ore of Leetness]} > 0) {
+		:sunderore
+		|**
+		/varset sunderbag ${FindItemBank[Sunderock Ore of Leetness].InvSlot.Pack.Name}
+		/delay 7
+		/if (!${Window[${sunderbag}].Open}) /itemnotify ${sunderbag} rightmouseup
+		**|
+		/call OpenBankBag "Sunderock Ore of Leetness"
+		/delay 5
+		/for s 1 to 27
+			/ctrlkey /itemnotify ${FindItemBank[Sunderock Ore of Leetness].InvSlot} leftmouseup
+			/delay 5
+			/autoi
+		/next s
+		/delay 3
+		/if (${Cursor.ID}) /autoi
+		/if (${FindItemCount[Sunderock Ore of Leetness]} < 27) /goto :sunderore
+			
+	} else {
+		/echo Your all out of Sunderock Ore's
+		/end
+		}
+		
+	/if (${FindItemBankCount[Direwind Ore of Leetness]} > 0) {
+		:direore
+		|**
+		/varset direbag ${FindItemBank[Direwind Ore of Leetness].InvSlot.Pack.Name}
+		/delay 7
+		/if (!${Window[${direbag}].Open}) /itemnotify ${direbag} rightmouseup
+		**|
+		/call OpenBankBag "Direwind Ore of Leetness"
+		/delay 5
+		/for d 1 to 27
+			/ctrlkey /itemnotify ${FindItemBank[Direwind Ore of Leetness].InvSlot} leftmouseup
+			/delay 5
+			/autoi
+		/next d
+		/delay 3
+		/if (${Cursor.ID}) /autoi
+		/if (${FindItemCount[Direwind Ore of Leetness]} < 27) /goto :direore
+		
+	} else {
+		/echo Your all out of Direwind Ore's
+		/end
+		}
+		
+	/if (${FindItemBankCount[Ashengate Ore of Leetness]} > 0) {
+		:ashenore
+		|**
+		/varset ashbag ${FindItemBank[Ashengate Ore of Leetness].InvSlot.Pack.Name}
+		/delay 7
+		/if (!${Window[${ashbag}].Open}) /itemnotify ${ashbag} rightmouseup
+		**|
+		/call OpenBankBag "Ashengate Ore of Leetness"
+		/delay 5
+		/for ash 1 to 27
+			/ctrlkey /itemnotify ${FindItemBank[Ashengate Ore of Leetness].InvSlot} leftmouseup
+			/delay 5
+			/autoi
+		/next ash
+		/delay 3
+		/if (${Cursor.ID}) /autoi
+		/if (${FindItemCount[Ashengate Ore of Leetness]} < 27) /goto :ashenore
+		
+	} else {
+		/echo Your all out of Ashengate Ore's
+		/end
+		}
+	
+	:mainloop
+	
+	/if ((${FindItemCount[direwind ore of leetness]} >= 3) && (${FindItemCount[sunderock ore of leetness]} >= 3) && (${FindItemCount[direwind ore of leetness]} >= 3)) {
+	
+		/if (${FindItemCount[Collection Bag]} < 1) {
+			/target ${MerchantName}
+
+			/if (${Target.Distance} > 10) {
+				/warp target
+				/delay 2
+				/stick 7 moveback
+				/face fast nolook
+				}
+
+			/delay 1s
+			/click right target
+			/delay 1s
+
+			/nomodkey /notify NewPointMerchantWnd NewPointMerchant_ItemList listselect ${Window[NewPointMerchantWnd].Child[NewPointMerchant_ItemList].List[${String[Collection Bag]},1]}
+			/delay 7
+			/nomodkey /notify NewPointMerchantWnd NewPointMerchant_PurchaseButton leftmouseup
+			/delay 7
+			/nomodkey /notify NewPointMerchantWnd NewPointMerchant_DoneButton leftmouseup
+			
+			/if (${Cursor.ID}) {
+				/itemnotify pack8 leftmouseup
+				/delay 7
+				/if (${Cursor.ID}) /autoinventory
+				}
+			
+			/delay 10
+		}
+		|/varset collectbag ${FindItem[Collection Bag].InvSlot.Name}
+		/call FindPack "Collection Bag"
+		/varset collectbag ${Macro.Return}
+		/keypress OPEN_INV_BAGS
+		
+		/delay 1s
+
+		/for sunderock 1 to 3
+			/ctrlkey /itemnotify ${FindItem[Sunderock Ore of leetness].InvSlot} leftmouseup
+			/delay 7
+			/itemnotify in ${collectbag} ${sunderock} leftmouseup
+			/delay 7
+		/next sunderock
+		
+		/for direwind 4 to 6
+			/ctrlkey /itemnotify ${FindItem[direwind Ore of leetness].InvSlot} leftmouseup
+			/delay 7
+			/itemnotify in ${collectbag} ${direwind} leftmouseup
+			/delay 7
+		/next direwind
+		
+		/for ashengate 7 to 9
+			/ctrlkey /itemnotify ${FindItem[ashengate Ore of leetness].InvSlot} leftmouseup
+			/delay 7
+			/itemnotify in ${collectbag} ${ashengate} leftmouseup
+			/delay 7
+		/next ashengate
+		
+		/nomodkey /notify ContainerWindow Container_Combine leftmouseup
+		/delay 2s
+		/autoinventory
+		/delay 10
+		
+		/if (${FindItemCount[Compound Ore of Leetness]} < 9) {
+			/goto :mainloop
+		} else {
+			/return
+			}
+		
+	} else {
+		/goto :getmoreore
+		}
+		
+/return
+
+|=====================================================|
+| Warps to john the wise, and buys a diamond leetball |
+|=====================================================|
+
+sub getleetball
+
+	/tar john the wise
+	/delay 3 ${Target.ID}
+	/if (${Target.Distance} > 10) {
+		/warp t
+		/delay 5
+		}
+		
+	/delay 1s
+	/click right target
+	/delay 1s
+
+	/nomodkey /notify NewPointMerchantWnd NewPointMerchant_ItemList listselect ${Window[NewPointMerchantWnd].Child[NewPointMerchant_ItemList].List[${String[Diamond Studded Ball of Leet Level 1]},1]}
+	/delay 7
+	/nomodkey /notify NewPointMerchantWnd NewPointMerchant_PurchaseButton leftmouseup
+	/delay 7
+	/nomodkey /notify NewPointMerchantWnd NewPointMerchant_DoneButton leftmouseup
+	/delay 5
+	/keypress OPEN_INV_BAGS
+	/delay 5
+	/itemnotify ${FindItem[Diamond Studded Ball of Leet Level 1].InvSlot} leftmouseup
+	/delay 10
+	/keypress CLOSE_INV_BAGS
+	
+/return
+
+|=====================================================|
+| Gets platinum from drysdale if you dont have enough |
+|=====================================================|
+
+sub getplat
+
+	/declare hundred int local
+
+	/tar drysdale
+	/delay 2 ${Target.ID}
+	/if (${Target.Distance} > 10) /warp t
+	/delay 15
+	/for hundred 1 to 2
+		/say Withdraw A Hundred Million
+		/delay 5
+	/next hundred
+	/say Withdraw Five Million
+	/delay 5
+	/if (${Me.Platinum} >= 205000000) {
+		/return
+	} else {
+		/echo You don't have enough platinum, START FARMING!!
+		/end
+		}
+/return
+
+Sub OpenBankBag(itemToFind)
+
+/declare bankSlot int local
+/declare bagSlot int local
+
+/for bankSlot 1 to 24
+	/if (${Me.Bank[${bankSlot}].Container}>0) {
+		/for bagSlot 1 to ${Me.Bank[${bankSlot}].Container}
+			/if (${Me.Bank[${bankSlot}].Item[${bagSlot}].Name.Equal[${itemToFind}]}) {
+				/if (!${Window[bank${bankSlot}].Open}) {
+					/nomodkey /itemnotify bank${bankSlot} rightmouseup
+					/return
+				}
+			}
+		/next bagSlot
+	}
+/next bankSlot
+/return
+
+Sub FindPack(packToFind)
+/declare x int local
+
+/for x 1 to 8
+	
+	/if (${Me.Inventory[pack${x}].Name.Equal[${packToFind}]}) {
+		/return pack${x}
+	}
+/next x
+
+/return 0
