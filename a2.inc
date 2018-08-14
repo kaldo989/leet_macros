@@ -73,7 +73,7 @@ Sub AddAlerts
 /alert clear 4
 /alert clear 5
 
-
+/alert add 1 ${Me.Name}
 /alert clear 60
 /delay 2
 
